@@ -1,0 +1,123 @@
+# ============================================================
+# Fraud Detection System - Master configuration
+# All modules read settings from this file via src/utils/config.py
+# ============================================================
+
+project:
+  name: "real-time-credit-card-fraud-detection"
+  version: "1.0.0"
+  random_seed: 42
+
+paths:
+  data_raw: "data/raw/creditcard.csv"
+  data_processed: "data/processed"
+  models_store: "models_store"
+  reports_figures: "reports/figures"
+  reports_tables: "reports/tables"
+  logs: "logs"
+
+data:
+  # Kaggle "European Credit Card Fraud Detection" dataset
+  source_url: "https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud"
+  target_column: "Class"
+  time_column: "Time"
+  amount_column: "Amount"
+  # Anonymized PCA features
+  pca_features: ["V1","V2","V3","V4","V5","V6","V7","V8","V9","V10",
+                 "V11","V12","V13","V14","V15","V16","V17","V18","V19",
+                 "V20","V21","V22","V23","V24","V25","V26","V27","V28"]
+
+feature_engineering:
+  enable_log_amount: true
+  enable_is_night: true
+  enable_hour_of_day: true
+  enable_rolling_stats: true
+  rolling_windows: [10, 50, 200]
+  enable_amount_zscore: true
+  enable_velocity: true
+  enable_interaction: true
+
+imbalance:
+  # Strategies to benchmark: none, undersample, smote, borderline, adasyn, smoteenn, tomek, class_weight
+  strategies: ["none", "smote", "borderline", "adasyn", "smoteenn", "class_weight"]
+  default_strategy: "smoteenn"
+  sampling_ratio: 0.1     # target minority ratio after resampling
+
+training:
+  cv_method: "time_series_split"   # avoid temporal leakage
+  n_splits: 5
+  test_size: 0.2
+  scoring_metric: "average_precision"   # PR-AUC
+  n_jobs: -1
+
+optuna:
+  n_trials: 30
+  timeout_seconds: 1800
+  pruner: "median"
+  sampler: "tpe"
+
+models:
+  logistic_regression:
+    enabled: true
+  random_forest:
+    enabled: true
+    n_estimators: 400
+    max_depth: 12
+  xgboost:
+    enabled: true
+    n_estimators: 600
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.9
+    colsample_bytree: 0.9
+  lightgbm:
+    enabled: true
+    n_estimators: 800
+    num_leaves: 64
+    learning_rate: 0.05
+  catboost:
+    enabled: true
+    iterations: 600
+    depth: 7
+    learning_rate: 0.05
+  ensemble:
+    enabled: true
+    voting: "soft"
+    weights: [1, 2, 3, 2]    # LR, RF, XGB, LGBM
+  stacking:
+    enabled: true
+    meta_learner: "logistic_regression"
+
+threshold:
+  # Decision threshold tuning strategy
+  strategy: "f1"             # one of: f1, mcc, cost_sensitive, business
+  fp_cost: 1.0
+  fn_cost: 10.0              # missing a fraud is far more expensive
+  default_threshold: 0.5
+
+calibration:
+  enabled: true
+  method: "isotonic"         # or 'sigmoid'
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  cors_origins: ["*"]
+  default_model: "stacking_ensemble"
+  enable_shap: true
+  block_threshold: 0.85      # auto-block decisions above this score
+
+dashboard:
+  refresh_interval_seconds: 5
+  api_base_url: "http://localhost:8000"
+
+database:
+  url: "sqlite:///./fraud_detection.db"
+  # url: "postgresql+psycopg2://user:pass@localhost:5432/fraud_db"
+  echo: false
+
+logging:
+  level: "INFO"
+  rotation: "10 MB"
+  retention: "30 days"
