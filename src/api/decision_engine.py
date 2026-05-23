@@ -83,9 +83,15 @@ class FraudDecisionEngine:
                 continue
             tried.add(candidate_name)
             try:
-                raw = (
-                    self.model
-=======
+    raw = (
+        ...
+    )
+except Exception:
+    raw = None
+
+for candidate_name in (self.model_name, *self._TREE_MODELS):
+    ...
+
         for candidate_name in (self.model_name, *self._TREE_MODELS):
             try:
                 candidate = (
@@ -96,7 +102,7 @@ class FraudDecisionEngine:
             except FileNotFoundError:
                 continue
             candidate = self._unwrap_estimator(raw)
-=======
+
             try:
                 self.explainer = ShapExplainer(candidate, background=background)
                 if candidate_name != self.model_name:
@@ -151,7 +157,7 @@ class FraudDecisionEngine:
     @staticmethod
     def _unwrap_estimator(m):
         """Drill through CalibratedClassifierCV / FrozenEstimator wrappers."""
-=======
+
     def _underlying_estimator(self):
         """Drill through CalibratedClassifierCV wrappers."""
         m = self.model
@@ -166,7 +172,6 @@ class FraudDecisionEngine:
     def _underlying_estimator(self):
         return self._unwrap_estimator(self.model)
 
-=======
     # ------------------------------------------------------------------
     def score(self, transaction: dict) -> EngineDecision:
         """Score a single transaction."""
