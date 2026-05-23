@@ -32,7 +32,8 @@ docker compose -f docker/docker-compose.yml up --build
 
 1. Push the repo to GitHub.
 2. Create two **Web Services** on Render:
-   - **API**: `docker/Dockerfile.api`, port `8000`.
+   - **API**: `docker/Dockerfile.api`. It binds to Render's `PORT`
+     environment variable, defaulting to `10000`.
    - **Dashboard**: `docker/Dockerfile.dashboard`, port `8501`,
      env var `DASHBOARD_API_BASE_URL=https://<api-service>.onrender.com`.
 3. Provision a **Render PostgreSQL** instance and set

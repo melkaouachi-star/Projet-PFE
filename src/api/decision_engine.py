@@ -83,17 +83,6 @@ class FraudDecisionEngine:
                 continue
             tried.add(candidate_name)
             try:
-    raw = (
-        ...
-    )
-except Exception:
-    raw = None
-
-for candidate_name in (self.model_name, *self._TREE_MODELS):
-    ...
-
-        for candidate_name in (self.model_name, *self._TREE_MODELS):
-            try:
                 candidate = (
                     self._underlying_estimator()
                     if candidate_name == self.model_name
@@ -101,7 +90,11 @@ for candidate_name in (self.model_name, *self._TREE_MODELS):
                 )
             except FileNotFoundError:
                 continue
-            candidate = self._unwrap_estimator(raw)
+            except Exception as exc:
+                log.debug(f"Could not load SHAP candidate '{candidate_name}': {exc}")
+                continue
+
+            candidate = self._unwrap_estimator(candidate)
 
             try:
                 self.explainer = ShapExplainer(candidate, background=background)
@@ -157,16 +150,22 @@ for candidate_name in (self.model_name, *self._TREE_MODELS):
     @staticmethod
     def _unwrap_estimator(m):
         """Drill through CalibratedClassifierCV / FrozenEstimator wrappers."""
-
-    def _underlying_estimator(self):
-        """Drill through CalibratedClassifierCV wrappers."""
-        m = self.model
         if hasattr(m, "calibrated_classifiers_") and m.calibrated_classifiers_:
-            inner = m.calibrated_classifiers_[0].estimator
-            # FrozenEstimator wraps the real estimator under .estimator too.
-            if hasattr(inner, "estimator"):
-                inner = inner.estimator
-            return inner
+            calibrated = m.calibrated_classifiers_[0]
+            if hasattr(calibrated, "estimator"):
+                m = calibrated.estimator
+            elif hasattr(calibrated, "base_estimator"):
+                m = calibrated.base_estimator
+
+        # FrozenEstimator and several sklearn wrappers expose the wrapped
+        # estimator under `.estimator`.
+        seen: set[int] = set()
+        while hasattr(m, "estimator") and id(m) not in seen:
+            seen.add(id(m))
+            inner = m.estimator
+            if inner is None or inner is m:
+                break
+            m = inner
         return m
 
     def _underlying_estimator(self):
