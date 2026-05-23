@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fraud-detection-system"
+version = "1.0.0"
+description = "Production-grade real-time credit-card fraud detection - Master's thesis."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Master's Thesis Author" }]
+license = { text = "MIT" }
+keywords = ["fraud-detection", "fintech", "machine-learning", "fastapi", "xai", "shap"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
