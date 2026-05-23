@@ -18,9 +18,7 @@ from pathlib import Path
 # Ensure the project root is on sys.path so `src.*` imports resolve when
 # Streamlit is launched directly (e.g. on Render, where PYTHONPATH is unset).
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
-
+from utils.config import get_config
 import pandas as pd
 import plotly.express as px
 import requests
