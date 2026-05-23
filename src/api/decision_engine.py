@@ -77,7 +77,6 @@ class FraudDecisionEngine:
         background = self._load_background_sample()
 
         # 1) Try the configured model directly (works for XGB/LGBM/RF/CatBoost).
-<<<<<<< HEAD
         tried: set[str] = set()
         for candidate_name in (self.model_name, *self._TREE_MODELS):
             if candidate_name in tried:
@@ -91,16 +90,13 @@ class FraudDecisionEngine:
             try:
                 candidate = (
                     self._underlying_estimator()
->>>>>>> 94ef16a0151cc849bc13ff704daa132d2c572306
                     if candidate_name == self.model_name
                     else load_model(candidate_name)
                 )
             except FileNotFoundError:
                 continue
-<<<<<<< HEAD
             candidate = self._unwrap_estimator(raw)
 =======
->>>>>>> 94ef16a0151cc849bc13ff704daa132d2c572306
             try:
                 self.explainer = ShapExplainer(candidate, background=background)
                 if candidate_name != self.model_name:
@@ -151,7 +147,7 @@ class FraudDecisionEngine:
         return features[self.feature_order]
 
     # ------------------------------------------------------------------
-<<<<<<< HEAD
+ 
     @staticmethod
     def _unwrap_estimator(m):
         """Drill through CalibratedClassifierCV / FrozenEstimator wrappers."""
@@ -159,7 +155,6 @@ class FraudDecisionEngine:
     def _underlying_estimator(self):
         """Drill through CalibratedClassifierCV wrappers."""
         m = self.model
->>>>>>> 94ef16a0151cc849bc13ff704daa132d2c572306
         if hasattr(m, "calibrated_classifiers_") and m.calibrated_classifiers_:
             inner = m.calibrated_classifiers_[0].estimator
             # FrozenEstimator wraps the real estimator under .estimator too.
@@ -168,12 +163,10 @@ class FraudDecisionEngine:
             return inner
         return m
 
-<<<<<<< HEAD
     def _underlying_estimator(self):
         return self._unwrap_estimator(self.model)
 
 =======
->>>>>>> 94ef16a0151cc849bc13ff704daa132d2c572306
     # ------------------------------------------------------------------
     def score(self, transaction: dict) -> EngineDecision:
         """Score a single transaction."""
