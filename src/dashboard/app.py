@@ -18,7 +18,7 @@ import plotly.express as px
 import requests
 import streamlit as st
 
-from src.utils.config import get_config
+from utils.config import get_config
 
 CFG = get_config()
 API_BASE = os.getenv("DASHBOARD_API_BASE_URL", CFG.dashboard.api_base_url).rstrip("/")
