@@ -6,6 +6,7 @@ Run with:
 """
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -23,12 +24,14 @@ log = get_logger("api.main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg = get_config()
+    host = os.getenv("API_HOST", cfg.api.host)
+    port = os.getenv("PORT", os.getenv("API_PORT", str(cfg.api.port)))
     log.info("Starting fraud detection API ...")
     try:
         init_db()
     except Exception as exc:
         log.exception(f"Database initialisation failed: {exc}")
-    log.info(f"API ready -> http://{cfg.api.host}:{cfg.api.port}/docs "
+    log.info(f"API ready -> http://{host}:{port}/docs "
              f"(root: /  health: /health)")
     yield
     log.info("Shutting down fraud detection API.")
