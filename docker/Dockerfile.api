@@ -20,5 +20,4 @@ COPY configs ./configs
 COPY scripts ./scripts
 COPY models_store ./models_store
 
-EXPOSE 10000
-CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
