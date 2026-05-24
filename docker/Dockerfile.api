@@ -22,4 +22,5 @@ COPY configs ./configs
 COPY scripts ./scripts
 COPY models_store ./models_store
 
-CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+EXPOSE 8080
+CMD ["python", "scripts/run_api.py"]
