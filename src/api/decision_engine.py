@@ -15,18 +15,21 @@ single, thread-safe object. The engine:
 from __future__ import annotations
 
 import threading
+import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 import pandas as pd
 
 from src.database.models import Decision
-from src.explainability.shap_explainer import ShapExplainer
 from src.utils.config import PROJECT_ROOT, get_config
 from src.utils.io import load_model
 from src.utils.logger import get_logger
+
+if TYPE_CHECKING:
+    from src.explainability.shap_explainer import ShapExplainer
 
 log = get_logger("api.engine")
 
@@ -53,7 +56,12 @@ class FraudDecisionEngine:
         self.block_threshold = float(cfg.api.block_threshold)
         # REVIEW band is between F1-optimal threshold and block_threshold.
         self.review_threshold = 0.5
-        self.enable_shap = bool(cfg.api.enable_shap)
+        enable_shap_env = os.getenv("ENABLE_SHAP", os.getenv("API_ENABLE_SHAP"))
+        self.enable_shap = (
+            bool(cfg.api.enable_shap)
+            if enable_shap_env is None
+            else enable_shap_env.strip().lower() in {"1", "true", "yes", "on"}
+        )
         self._lock = threading.Lock()
 
         log.info(f"Loading model '{self.model_name}' and feature pipeline...")
@@ -74,6 +82,12 @@ class FraudDecisionEngine:
     # ------------------------------------------------------------------
     def _setup_shap_explainer(self) -> None:
         """Try several strategies so SHAP works for *any* trained model."""
+        try:
+            from src.explainability.shap_explainer import ShapExplainer
+        except Exception as exc:
+            log.warning(f"SHAP disabled - explainer dependencies unavailable: {exc}")
+            return
+
         background = self._load_background_sample()
 
         # 1) Try the configured model directly (works for XGB/LGBM/RF/CatBoost).

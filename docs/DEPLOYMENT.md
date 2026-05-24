@@ -42,7 +42,8 @@ docker compose -f docker/docker-compose.yml up --build
 ## 4. Railway
 
 The API service is configured by `railway.json` to build
-`docker/Dockerfile.api`, start Uvicorn on Railway's `PORT`, and use
+`docker/Dockerfile.api`, install the lightweight `requirements-api.txt`
+runtime dependencies, start Uvicorn on Railway's `PORT`, and use
 `/health` as the deployment healthcheck. Provision a Postgres plugin
 and inject its connection URL into the API service when you want
 persistent monitoring data.
