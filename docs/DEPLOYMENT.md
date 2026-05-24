@@ -41,8 +41,11 @@ docker compose -f docker/docker-compose.yml up --build
 
 ## 4. Railway
 
-The same Dockerfiles work as-is on Railway.  Provision a Postgres
-plugin and inject its connection URL into the API service.
+The API service is configured by `railway.json` to build
+`docker/Dockerfile.api`, start Uvicorn on Railway's `PORT`, and use
+`/health` as the deployment healthcheck. Provision a Postgres plugin
+and inject its connection URL into the API service when you want
+persistent monitoring data.
 
 ## 5. HuggingFace Spaces
 
