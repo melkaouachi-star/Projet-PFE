@@ -9,7 +9,7 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg2://fraud:fraud@db:5432/fraud_db
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - db
     volumes:
@@ -21,7 +21,7 @@ services:
       dockerfile: docker/Dockerfile.dashboard
     container_name: fraud-dashboard
     environment:
-      - DASHBOARD_API_BASE_URL=http://api:8000
+      - DASHBOARD_API_BASE_URL=http://api:8080
     ports:
       - "8501:8501"
     depends_on:
