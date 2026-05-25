@@ -62,6 +62,32 @@ def create_app() -> FastAPI:
     app.include_router(explain.router)
     app.include_router(monitoring.router)
 
+    # Banking platform router (live simulator, SSE/WebSocket, fraud alerts,
+    # customers, SHAP). Guarded so a partial outage in this layer cannot
+    # take down the core /api/v1/predict + /health endpoints.
+    try:
+        from src.api.routers import banking  # noqa: WPS433 (local import on purpose)
+
+        app.include_router(banking.router)
+    except Exception as exc:  # pragma: no cover - defensive boot guard
+        log.exception(f"Banking router not registered: {exc}")
+
+    # Cost-analysis + optimal-threshold endpoints (Phase 3).
+    try:
+        from src.api.routers import cost as cost_router  # noqa: WPS433
+
+        app.include_router(cost_router.router)
+    except Exception as exc:  # pragma: no cover - defensive boot guard
+        log.exception(f"Cost router not registered: {exc}")
+
+    # Export endpoints (CSV + Power BI ZIP bundle, Phase 3).
+    try:
+        from src.api.routers import exports as exports_router  # noqa: WPS433
+
+        app.include_router(exports_router.router)
+    except Exception as exc:  # pragma: no cover - defensive boot guard
+        log.exception(f"Exports router not registered: {exc}")
+
     @app.get("/", tags=["root"])
     def root():
         return {

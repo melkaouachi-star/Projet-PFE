@@ -95,6 +95,41 @@ threshold:
   fn_cost: 10.0              # missing a fraud is far more expensive
   default_threshold: 0.5
 
+cost_analysis:
+  # Formal asymmetric cost function C(s) = FN(s) * C_FN + FP(s) * C_FP.
+  # Two modes:
+  #   fixed         -> every undetected fraud costs `c_fn` units,
+  #                    every false positive costs `c_fp` units.
+  #   amount_aware  -> per-fraud cost = transaction_amount * loss_factor
+  #                    + chargeback_penalty + handling_cost + reputational_proxy.
+  mode: "amount_aware"
+  currency: "EUR"
+  c_fn: 250.0                # fallback unit cost when mode = fixed
+  c_fp: 12.0                 # fallback unit cost when mode = fixed
+
+  # amount_aware composition of C_FN (per missed fraud)
+  loss_factor: 1.0           # fraction of fraudulent amount reimbursed
+  chargeback_penalty: 25.0   # fixed scheme/network penalty
+  handling_cost: 18.0        # ops handling cost
+  reputational_proxy: 10.0   # blended reputational cost proxy
+
+  # amount_aware composition of C_FP (per legit blocked)
+  fp_investigation_cost: 8.0
+  fp_lost_margin: 3.0
+  fp_dissatisfaction: 1.5
+
+  # Threshold sweep grid
+  threshold_start: 0.01
+  threshold_stop: 0.99
+  threshold_step: 0.01
+
+  # Compare every optimum against this baseline threshold
+  baseline_threshold: 0.50
+
+  # Output paths (relative to project root, written by scripts/run_cost_analysis.py)
+  tables_dir: "reports/tables"
+  figures_dir: "reports/figures"
+
 calibration:
   enabled: true
   method: "isotonic"         # or 'sigmoid'
