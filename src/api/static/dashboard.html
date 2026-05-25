@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Banking Fraud Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #64748b;
+      --panel: #ffffff;
+      --line: #d7dee8;
+      --soft: #f4f7fb;
+      --green: #0f8b62;
+      --orange: #d97706;
+      --red: #c2413d;
+      --blue: #1d4ed8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef2f7;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, select { font: inherit; }
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: #ffffff;
+      background: #172033;
+      border-bottom: 1px solid #2b3649;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 760; }
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: #2563eb;
+      color: white;
+    }
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
+    .status-dot.live { background: #22c55e; box-shadow: 0 0 0 5px rgba(34,197,94,.13); }
+    .page { width: 100%; max-width: 1680px; margin: 0 auto; padding: 18px; display: grid; gap: 14px; }
+    .toolbar, .panel, .metric, .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px; gap: 12px; flex-wrap: wrap; }
+    .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      min-height: 38px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.primary { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+    .btn.danger { background: #c2413d; border-color: #c2413d; color: #fff; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .select, .input {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 0 10px;
+      color: var(--ink);
+    }
+    .metrics { display: grid; grid-template-columns: repeat(6, minmax(130px, 1fr)); gap: 12px; }
+    .metric { padding: 12px; min-height: 82px; }
+    .metric span { color: var(--muted); font-size: 12px; font-weight: 680; text-transform: uppercase; }
+    .metric strong { display: block; margin-top: 8px; font-size: 25px; line-height: 1; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(360px, .95fr); gap: 14px; }
+    .stack { display: grid; gap: 14px; }
+    .panel { min-width: 0; overflow: hidden; }
+    .panel-head {
+      min-height: 46px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title { font-size: 14px; font-weight: 760; }
+    .panel-body { padding: 12px 14px; }
+    .table-wrap { overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e6ebf2;
+      text-align: left;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; background: #f8fafc; }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 86px; height: 24px; padding: 0 8px;
+      border-radius: 999px; font-size: 11px; font-weight: 780;
+    }
+    .badge.APPROVED { color: #075e45; background: #dff7ec; }
+    .badge.SUSPICIOUS { color: #8a4b00; background: #fff0cc; }
+    .badge.BLOCKED { color: #8f1d1b; background: #ffe0df; }
+    #map { width: 100%; height: 430px; background: #dbe5ef; }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .chart-box { height: 260px; position: relative; }
+    .alerts { display: grid; gap: 10px; max-height: 352px; overflow: auto; padding-right: 4px; }
+    .alert-item { border: 1px solid var(--line); border-left: 4px solid var(--orange); border-radius: 8px; padding: 10px; background: #fff; }
+    .alert-item.CRITICAL, .alert-item.HIGH { border-left-color: var(--red); }
+    .alert-item.MEDIUM { border-left-color: var(--orange); }
+    .alert-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .muted { color: var(--muted); }
+    .reason-list { display: grid; gap: 8px; }
+    .reason { display: grid; grid-template-columns: 1fr 58px; gap: 10px; align-items: center; }
+    .bar { height: 8px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+    .bar > span { display: block; height: 100%; background: #1d4ed8; }
+    .mobile-card { display: none; }
+    @media (max-width: 1120px) {
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .grid, .charts { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .topbar { padding: 0 14px; }
+      .page { padding: 12px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .desktop-table { display: none; }
+      .mobile-card { display: grid; gap: 10px; }
+      .toolbar { align-items: stretch; }
+      .controls, .toolbar > div { width: 100%; }
+      .btn, .select, .input { flex: 1 1 130px; }
+      #map { height: 330px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useEffect, useMemo, useRef, useState } = React;
+    const API = window.location.origin;
+
+    async function fetchJson(path, options = {}) {
+      const res = await fetch(API + path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    function fmtMoney(value, currency) {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "USD", maximumFractionDigits: 0 }).format(value || 0);
+    }
+
+    function fmtTime(value) {
+      if (!value) return "-";
+      const dt = new Date(value);
+      return Number.isNaN(dt.getTime()) ? value : dt.toLocaleTimeString();
+    }
+
+    function DecisionBadge({ decision }) {
+      return <span className={"badge " + (decision || "APPROVED")}>{decision || "APPROVED"}</span>;
+    }
+
+    function Metric({ label, value }) {
+      return <div className="metric"><span>{label}</span><strong>{value}</strong></div>;
+    }
+
+    function App() {
+      const [events, setEvents] = useState([]);
+      const [alerts, setAlerts] = useState([]);
+      const [analytics, setAnalytics] = useState(null);
+      const [sim, setSim] = useState({ running: false, rate_tps: 10, fraud_ratio: .08, generated: 0 });
+      const [rate, setRate] = useState(10);
+      const [fraudRatio, setFraudRatio] = useState(.08);
+      const [selected, setSelected] = useState(null);
+      const [clock, setClock] = useState(new Date());
+      const mapRef = useRef(null);
+      const markerLayer = useRef(null);
+      const lineChart = useRef(null);
+      const decisionChart = useRef(null);
+
+      useEffect(() => {
+        bootstrap();
+        const tick = setInterval(() => setClock(new Date()), 1000);
+        const poll = setInterval(refreshAnalytics, 5000);
+        connectStream();
+        return () => { clearInterval(tick); clearInterval(poll); };
+      }, []);
+
+      useEffect(() => {
+        if (window.lucide) window.lucide.createIcons();
+      });
+
+      useEffect(() => {
+        initMap();
+        if (events[0]) addMarker(events[0]);
+      }, [events]);
+
+      useEffect(() => {
+        renderCharts();
+      }, [events, analytics]);
+
+      async function bootstrap() {
+        try {
+          const [txs, liveAlerts, stats, status] = await Promise.all([
+            fetchJson("/transactions?limit=150").catch(() => []),
+            fetchJson("/fraud-alerts?limit=50").catch(() => []),
+            fetchJson("/analytics/live").catch(() => null),
+            fetchJson("/simulator/status").catch(() => null),
+          ]);
+          setEvents(txs || []);
+          setAlerts(liveAlerts || []);
+          setAnalytics(stats);
+          if (status) {
+            setSim(status);
+            setRate(status.rate_tps);
+            setFraudRatio(status.fraud_ratio);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      async function refreshAnalytics() {
+        try {
+          const [stats, liveAlerts, status] = await Promise.all([
+            fetchJson("/analytics/live"),
+            fetchJson("/fraud-alerts?limit=50"),
+            fetchJson("/simulator/status"),
+          ]);
+          setAnalytics(stats);
+          setAlerts(liveAlerts);
+          setSim(status);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      function connectStream() {
+        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const ws = new WebSocket(`${protocol}://${window.location.host}/ws/live-stream`);
+        ws.onmessage = (msg) => pushEvent(JSON.parse(msg.data));
+        ws.onerror = () => {
+          try {
+            const source = new EventSource(API + "/live-stream");
+            source.onmessage = (msg) => pushEvent(JSON.parse(msg.data));
+          } catch (err) {
+            console.error(err);
+          }
+        };
+      }
+
+      function pushEvent(event) {
+        setEvents(prev => [event, ...prev.filter(item => item.transaction_id !== event.transaction_id)].slice(0, 300));
+        setSelected(prev => prev || event);
+        if (["BLOCKED", "SUSPICIOUS"].includes(event.decision)) {
+          setAlerts(prev => [{
+            id: event.transaction_id,
+            transaction_id: event.transaction_id,
+            customer_name: event.customer_name,
+            severity: event.alert_severity || (event.decision === "BLOCKED" ? "HIGH" : "MEDIUM"),
+            amount: event.amount || event.transaction_amount,
+            country: event.country,
+            city: event.city,
+            risk_score: event.risk_score,
+            status: event.decision,
+            message: event.alert_message || `${event.customer_name} ${event.decision}`,
+            created_at: event.timestamp,
+          }, ...prev.filter(item => (item.transaction_id || item.id) !== event.transaction_id)].slice(0, 60));
+        }
+      }
+
+      async function start() {
+        const status = await fetchJson("/simulator/start", {
+          method: "POST",
+          body: JSON.stringify({ rate_tps: Number(rate), fraud_ratio: Number(fraudRatio) }),
+        });
+        setSim(status);
+      }
+
+      async function stop() {
+        const status = await fetchJson("/simulator/stop", { method: "POST" });
+        setSim(status);
+      }
+
+      async function seedCustomers() {
+        await fetchJson("/customers/generate", {
+          method: "POST",
+          body: JSON.stringify({ count: 5000, seed: 42, persist: true }),
+        });
+      }
+
+      async function injectScenario(scenario) {
+        const tx = await fetchJson(`/simulator/sample?scenario=${scenario || ""}&rate_tps=${rate}&fraud_ratio=${fraudRatio}`);
+        const scored = await fetchJson("/predict", { method: "POST", body: JSON.stringify(tx) });
+        const event = { ...tx, ...scored, amount: scored.amount, currency: scored.currency };
+        setSelected(event);
+        pushEvent(event);
+      }
+
+      function initMap() {
+        if (mapRef.current || !window.L) return;
+        mapRef.current = L.map("map", { zoomControl: false, attributionControl: false }).setView([24, 0], 2);
+        L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(mapRef.current);
+        markerLayer.current = L.layerGroup().addTo(mapRef.current);
+      }
+
+      function addMarker(event) {
+        if (!markerLayer.current || !event.latitude || !event.longitude) return;
+        const color = event.decision === "BLOCKED" ? "#c2413d" : event.decision === "SUSPICIOUS" ? "#d97706" : "#0f8b62";
+        const marker = L.circleMarker([event.latitude, event.longitude], {
+          radius: event.decision === "BLOCKED" ? 9 : 6,
+          color,
+          fillColor: color,
+          fillOpacity: event.decision === "BLOCKED" ? .82 : .58,
+          weight: 2,
+        }).bindPopup(`${event.customer_name}<br>${fmtMoney(event.amount || event.transaction_amount, event.currency || event.transaction_currency)}<br>${event.city}, ${event.country}<br>Risk ${event.risk_score}`);
+        marker.addTo(markerLayer.current);
+        const layers = markerLayer.current.getLayers();
+        if (layers.length > 350) markerLayer.current.removeLayer(layers[0]);
+      }
+
+      function renderCharts() {
+        if (!window.Chart) return;
+        const ctx1 = document.getElementById("timelineChart");
+        const ctx2 = document.getElementById("decisionChart");
+        if (!ctx1 || !ctx2) return;
+        const timeline = analytics?.timeline?.length ? analytics.timeline.slice(-30) : buildTimeline(events);
+        const labels = timeline.map(x => x.minute?.slice(11) || "");
+        const txCounts = timeline.map(x => x.transactions || 0);
+        const blocked = timeline.map(x => x.blocked || 0);
+        const suspicious = timeline.map(x => x.suspicious || 0);
+        if (!lineChart.current) {
+          lineChart.current = new Chart(ctx1, {
+            type: "line",
+            data: { labels, datasets: [
+              { label: "Transactions", data: txCounts, borderColor: "#1d4ed8", backgroundColor: "rgba(29,78,216,.12)", fill: true, tension: .35 },
+              { label: "Blocked", data: blocked, borderColor: "#c2413d", backgroundColor: "rgba(194,65,61,.12)", fill: true, tension: .35 },
+              { label: "Suspicious", data: suspicious, borderColor: "#d97706", backgroundColor: "rgba(217,119,6,.12)", fill: true, tension: .35 },
+            ] },
+            options: chartOptions(),
+          });
+        } else {
+          lineChart.current.data.labels = labels;
+          lineChart.current.data.datasets[0].data = txCounts;
+          lineChart.current.data.datasets[1].data = blocked;
+          lineChart.current.data.datasets[2].data = suspicious;
+          lineChart.current.update("none");
+        }
+        const decisions = countDecisions(events);
+        if (!decisionChart.current) {
+          decisionChart.current = new Chart(ctx2, {
+            type: "doughnut",
+            data: { labels: ["Approved", "Suspicious", "Blocked"], datasets: [{ data: [decisions.APPROVED, decisions.SUSPICIOUS, decisions.BLOCKED], backgroundColor: ["#0f8b62", "#d97706", "#c2413d"] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } }, cutout: "62%" },
+          });
+        } else {
+          decisionChart.current.data.datasets[0].data = [decisions.APPROVED, decisions.SUSPICIOUS, decisions.BLOCKED];
+          decisionChart.current.update("none");
+        }
+      }
+
+      const decisions = useMemo(() => countDecisions(events), [events]);
+      const selectedReasons = selected?.risk_contribution_score || selected?.dynamic_features || {};
+
+      return (
+        <div className="shell">
+          <header className="topbar">
+            <div className="brand"><div className="brand-mark"><i data-lucide="shield-check" size="20"></i></div><div>Fraud Command Center</div></div>
+            <div className="controls">
+              <div className={"status-dot " + (sim.running ? "live" : "")}></div>
+              <span>{clock.toLocaleTimeString()}</span>
+            </div>
+          </header>
+          <main className="page">
+            <section className="toolbar">
+              <div className="controls">
+                <select className="select" value={rate} onChange={e => setRate(e.target.value)} aria-label="Transactions per second">
+                  <option value="10">10 TPS</option>
+                  <option value="100">100 TPS</option>
+                  <option value="1000">1000 TPS</option>
+                </select>
+                <input className="input" type="number" min="0" max="1" step="0.01" value={fraudRatio} onChange={e => setFraudRatio(e.target.value)} aria-label="Fraud ratio" />
+                <button className="btn primary" onClick={start}><i data-lucide="play" size="16"></i>Start</button>
+                <button className="btn danger" onClick={stop}><i data-lucide="square" size="16"></i>Stop</button>
+                <button className="btn" onClick={seedCustomers}><i data-lucide="users" size="16"></i>Seed 5000</button>
+              </div>
+              <div className="controls">
+                <button className="btn" onClick={() => injectScenario("normal")}><i data-lucide="check-circle" size="16"></i>Normal</button>
+                <button className="btn" onClick={() => injectScenario("account_takeover")}><i data-lucide="key-round" size="16"></i>ATO</button>
+                <button className="btn" onClick={() => injectScenario("impossible_travel")}><i data-lucide="plane" size="16"></i>Travel</button>
+                <button className="btn" onClick={() => injectScenario("bot_generated_fraud")}><i data-lucide="bot" size="16"></i>Bot</button>
+              </div>
+            </section>
+
+            <section className="metrics">
+              <Metric label="Transactions" value={analytics?.transactions_total ?? events.length} />
+              <Metric label="Per Minute" value={analytics?.transactions_per_minute ?? 0} />
+              <Metric label="Frauds/Hour" value={analytics?.frauds_per_hour ?? 0} />
+              <Metric label="Blocked" value={analytics?.blocked_transactions ?? decisions.BLOCKED} />
+              <Metric label="Suspicious" value={analytics?.suspicious_transactions ?? decisions.SUSPICIOUS} />
+              <Metric label="False Positives" value={analytics?.false_positives ?? 0} />
+            </section>
+
+            <section className="grid">
+              <div className="stack">
+                <div className="panel">
+                  <div className="panel-head"><div className="panel-title">World Transaction Map</div><span className="muted">{events.length} live events</span></div>
+                  <div id="map"></div>
+                </div>
+                <div className="charts">
+                  <div className="panel"><div className="panel-head"><div className="panel-title">Live Volume</div></div><div className="panel-body chart-box"><canvas id="timelineChart"></canvas></div></div>
+                  <div className="panel"><div className="panel-head"><div className="panel-title">Decision Mix</div></div><div className="panel-body chart-box"><canvas id="decisionChart"></canvas></div></div>
+                </div>
+                <TransactionTable events={events} onSelect={setSelected} />
+              </div>
+              <aside className="stack">
+                <AlertCenter alerts={alerts} />
+                <Explanation event={selected || events[0]} reasons={selectedReasons} />
+                <Heatmap rows={analytics?.country_heatmap || []} />
+              </aside>
+            </section>
+          </main>
+        </div>
+      );
+    }
+
+    function TransactionTable({ events, onSelect }) {
+      const rows = events.slice(0, 80);
+      return (
+        <div className="table-wrap">
+          <div className="panel-head"><div className="panel-title">Live Transactions</div><span className="muted">{rows.length} shown</span></div>
+          <table className="desktop-table">
+            <thead><tr><th>Time</th><th>Customer</th><th>Country</th><th>City</th><th>IP Address</th><th>Amount</th><th>Fraud %</th><th>Risk</th><th>Decision</th></tr></thead>
+            <tbody>{rows.map(row => (
+              <tr key={row.transaction_id} onClick={() => onSelect(row)}>
+                <td>{fmtTime(row.timestamp)}</td><td>{row.customer_name}</td><td>{row.country}</td><td>{row.city}</td><td>{row.ip_address}</td>
+                <td>{fmtMoney(row.amount || row.transaction_amount, row.currency || row.transaction_currency)}</td><td>{Number(row.fraud_probability || 0).toFixed(1)}%</td><td>{row.risk_score}</td><td><DecisionBadge decision={row.decision} /></td>
+              </tr>
+            ))}</tbody>
+          </table>
+          <div className="mobile-card panel-body">
+            {rows.slice(0, 30).map(row => (
+              <div className="alert-item" key={row.transaction_id} onClick={() => onSelect(row)}>
+                <div className="alert-row"><strong>{row.customer_name}</strong><DecisionBadge decision={row.decision} /></div>
+                <div className="muted">{fmtTime(row.timestamp)} - {row.city}, {row.country}</div>
+                <div>{fmtMoney(row.amount || row.transaction_amount, row.currency || row.transaction_currency)} - Risk {row.risk_score}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function AlertCenter({ alerts }) {
+      return (
+        <div className="panel">
+          <div className="panel-head"><div className="panel-title">Fraud Alert Center</div><span className="muted">{alerts.length}</span></div>
+          <div className="panel-body alerts">
+            {alerts.length === 0 && <div className="muted">No active alerts</div>}
+            {alerts.map(alert => (
+              <div className={"alert-item " + (alert.severity || "MEDIUM")} key={alert.id || alert.transaction_id}>
+                <div className="alert-row"><strong>{alert.customer_name}</strong><DecisionBadge decision={alert.status} /></div>
+                <div>{fmtMoney(alert.amount, alert.currency || "USD")} - {alert.city}, {alert.country}</div>
+                <div className="muted">Risk {alert.risk_score} - {fmtTime(alert.created_at)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Explanation({ event, reasons }) {
+      const entries = Object.entries(reasons || {}).slice(0, 6);
+      return (
+        <div className="panel">
+          <div className="panel-head"><div className="panel-title">Decision Explainability</div><span className="muted">{event?.transaction_id || "-"}</span></div>
+          <div className="panel-body">
+            {!event && <div className="muted">Waiting for a transaction</div>}
+            {event && (
+              <>
+                <div className="alert-row"><strong>{event.customer_name}</strong><DecisionBadge decision={event.decision} /></div>
+                <div className="muted">{event.fraud_level} - {Number(event.fraud_probability || 0).toFixed(1)}% probability</div>
+                <div className="reason-list" style={{ marginTop: 14 }}>
+                  {entries.map(([name, detail]) => (
+                    <div key={name} className="reason">
+                      <div>
+                        <strong>{name.replaceAll("_", " ")}</strong>
+                        <div className="muted">{detail.reason}</div>
+                        <div className="bar"><span style={{ width: `${Math.min(100, Math.abs(detail.risk_points || 0))}%` }}></span></div>
+                      </div>
+                      <strong>{Number(detail.risk_points || 0).toFixed(0)}</strong>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function Heatmap({ rows }) {
+      return (
+        <div className="panel">
+          <div className="panel-head"><div className="panel-title">Country Heatmap</div><span className="muted">{rows.length}</span></div>
+          <div className="panel-body reason-list">
+            {rows.slice(0, 8).map(row => {
+              const ratio = row.transactions ? row.blocked / row.transactions : 0;
+              return <div key={row.country} className="reason"><div><strong>{row.country}</strong><div className="bar"><span style={{ width: `${Math.round(ratio * 100)}%`, background: ratio > .25 ? "#c2413d" : "#d97706" }}></span></div></div><strong>{row.blocked}/{row.transactions}</strong></div>;
+            })}
+            {rows.length === 0 && <div className="muted">No geography data</div>}
+          </div>
+        </div>
+      );
+    }
+
+    function buildTimeline(events) {
+      const buckets = {};
+      for (const event of events) {
+        const dt = new Date(event.timestamp);
+        const key = Number.isNaN(dt.getTime()) ? "now" : dt.toISOString().slice(0, 16);
+        buckets[key] ||= { minute: key, transactions: 0, blocked: 0, suspicious: 0 };
+        buckets[key].transactions += 1;
+        if (event.decision === "BLOCKED") buckets[key].blocked += 1;
+        if (event.decision === "SUSPICIOUS") buckets[key].suspicious += 1;
+      }
+      return Object.values(buckets).sort((a, b) => a.minute.localeCompare(b.minute)).slice(-30);
+    }
+
+    function countDecisions(events) {
+      return events.reduce((acc, event) => {
+        acc[event.decision || "APPROVED"] = (acc[event.decision || "APPROVED"] || 0) + 1;
+        return acc;
+      }, { APPROVED: 0, SUSPICIOUS: 0, BLOCKED: 0 });
+    }
+
+    function chartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } },
+        scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { precision: 0 } } },
+      };
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
