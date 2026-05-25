@@ -19,6 +19,10 @@ from src.utils.config import get_config
 
 _cfg = get_config().database
 DATABASE_URL = os.getenv("DATABASE_URL", _cfg.url)
+# Render Postgres exposes URLs as `postgres://...` but SQLAlchemy 2.x
+# only accepts the explicit driver form.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
 _connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_engine(DATABASE_URL, echo=_cfg.echo, connect_args=_connect_args, future=True)

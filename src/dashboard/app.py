@@ -28,6 +28,11 @@ from src.utils.config import get_config
 
 CFG = get_config()
 API_BASE = os.getenv("DASHBOARD_API_BASE_URL", CFG.dashboard.api_base_url).rstrip("/")
+# Render's `fromService.property: host` provides a bare hostname (no scheme).
+# Default to https when no scheme is present so the dashboard works on Render
+# without extra configuration.
+if "://" not in API_BASE:
+    API_BASE = f"https://{API_BASE}"
 
 st.set_page_config(
     page_title="Real-time Fraud Detection Console",

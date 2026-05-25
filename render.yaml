@@ -1,0 +1,51 @@
+# Render Blueprint
+# Deploys the fraud detection stack on Render:
+#   - api        : FastAPI backend (Dockerfile at repo root)
+#   - dashboard  : Streamlit dashboard (docker/Dockerfile.dashboard)
+#   - fraud-db   : Managed PostgreSQL instance
+#
+# Apply by connecting this repo as a Blueprint in the Render dashboard
+# (New + > Blueprint). Render will pick up this file automatically.
+
+databases:
+  - name: fraud-db
+    plan: free
+    databaseName: fraud_db
+    user: fraud
+
+services:
+  - type: web
+    name: fraud-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: ENABLE_SHAP
+        value: "0"
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fraud-db
+          property: connectionString
+
+  - type: web
+    name: fraud-dashboard
+    runtime: docker
+    plan: free
+    dockerfilePath: ./docker/Dockerfile.dashboard
+    dockerContext: .
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DASHBOARD_API_BASE_URL
+        fromService:
+          type: web
+          name: fraud-api
+          property: host
