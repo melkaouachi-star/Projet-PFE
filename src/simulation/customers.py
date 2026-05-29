@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
+from typing import Any
 
 from src.simulation.catalogs import (
     BEHAVIOR_PATTERNS,
@@ -19,7 +20,7 @@ class CustomerGenerator:
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
 
-    def generate_customer(self, index: int) -> dict:
+    def generate_customer(self, index: int) -> dict[str, Any]:
         risk_profile = self.rng.choices(
             ["LOW", "MEDIUM", "VIP", "HIGH", "FRAUDSTER"],
             weights=[54, 24, 12, 8, 2],
@@ -53,7 +54,7 @@ class CustomerGenerator:
             "fraud_history_count": self._fraud_history(risk_profile),
         }
 
-    def generate_many(self, count: int = 5000) -> list[dict]:
+    def generate_many(self, count: int = 5000) -> list[dict[str, Any]]:
         return [self.generate_customer(i) for i in range(1, count + 1)]
 
     def _behavior_for_profile(self, risk_profile: str) -> str:

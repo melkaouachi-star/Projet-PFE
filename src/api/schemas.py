@@ -296,6 +296,7 @@ class SimulatorStatusOut(BaseModel):
     generated: int
     started_at: Optional[str] = None
     last_error: Optional[str] = None
+    run_id: Optional[str] = None
 
 
 # ======================================================================

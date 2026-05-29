@@ -15,18 +15,6 @@ services:
     volumes:
       - ../models_store:/app/models_store
 
-  dashboard:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.dashboard
-    container_name: fraud-dashboard
-    environment:
-      - DASHBOARD_API_BASE_URL=http://api:8080
-    ports:
-      - "8501:8501"
-    depends_on:
-      - api
-
   db:
     image: postgres:16
     container_name: fraud-db

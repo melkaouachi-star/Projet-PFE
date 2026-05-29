@@ -1,11 +1,13 @@
 # Render Blueprint
-# Deploys the fraud detection stack on Render:
-#   - api        : FastAPI backend (Dockerfile at repo root)
-#   - dashboard  : Streamlit dashboard (docker/Dockerfile.dashboard)
-#   - fraud-db   : Managed PostgreSQL instance
 #
-# Apply by connecting this repo as a Blueprint in the Render dashboard
-# (New + > Blueprint). Render will pick up this file automatically.
+# This blueprint deploys the current live platform as one web service:
+#   - FastAPI REST API
+#   - WebSocket/SSE live stream
+#   - Static React dashboard served by FastAPI at /dashboard
+#   - Managed PostgreSQL database
+#
+# Render will inject PORT automatically. scripts/run_api.py reads PORT and
+# binds Uvicorn to 0.0.0.0 so the service is reachable from the internet.
 
 databases:
   - name: fraud-db
@@ -15,7 +17,7 @@ databases:
 
 services:
   - type: web
-    name: fraud-api
+    name: fraud-platform
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
@@ -29,23 +31,9 @@ services:
         value: "0"
       - key: API_HOST
         value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: INFO
       - key: DATABASE_URL
         fromDatabase:
           name: fraud-db
           property: connectionString
-
-  - type: web
-    name: fraud-dashboard
-    runtime: docker
-    plan: free
-    dockerfilePath: ./docker/Dockerfile.dashboard
-    dockerContext: .
-    autoDeploy: true
-    envVars:
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: DASHBOARD_API_BASE_URL
-        fromService:
-          type: web
-          name: fraud-api
-          property: host

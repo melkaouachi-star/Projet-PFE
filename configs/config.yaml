@@ -136,7 +136,7 @@ calibration:
 
 api:
   host: "0.0.0.0"
-  port: 8080
+  port: 8000
   reload: false
   cors_origins: ["*"]
   default_model: "stacking_ensemble"
@@ -145,7 +145,24 @@ api:
 
 dashboard:
   refresh_interval_seconds: 5
-  api_base_url: "http://localhost:8080"
+  api_base_url: "http://localhost:8000"
+
+powerbi:
+  # Output directory for timestamped export bundles (scripts/build_powerbi_bundle.py).
+  bundle_dir: "exports/powerbi_bundle"
+  # Theme + asset locations (relative to project root).
+  assets_dir: "powerbi"
+  theme_file: "powerbi/fintech_fraud_theme.json"
+  # Per-transaction economic constants surfaced in the vw_powerbi_* views.
+  # These MIRROR cost_analysis above so the views and the cost pipeline agree.
+  #   fp_unit_cost = fp_investigation_cost + fp_lost_margin + fp_dissatisfaction
+  fp_unit_cost: 12.5
+  # Risk-score thresholds used by the dynamic scoring engine (0-100 scale).
+  # Exposed read-only in the views as threshold_used / review_threshold.
+  block_threshold: 70.0
+  review_threshold: 45.0
+  # Max rows pulled by the /api/powerbi/* JSON fallback endpoints.
+  api_row_limit: 50000
 
 database:
   url: "sqlite:///./fraud_detection.db"

@@ -124,6 +124,7 @@ def shap_explanation(
 
 
 @router.post("/simulator/start", response_model=SimulatorStatusOut, summary="Start fraud simulator")
+@router.post("/simulation/start", response_model=SimulatorStatusOut, include_in_schema=False)
 @router.post("/api/v1/banking/simulator/start", response_model=SimulatorStatusOut, include_in_schema=False)
 async def start_simulator(payload: SimulatorControlIn):
     return await get_simulation_service().start(
@@ -133,12 +134,14 @@ async def start_simulator(payload: SimulatorControlIn):
 
 
 @router.post("/simulator/stop", response_model=SimulatorStatusOut, summary="Stop fraud simulator")
+@router.post("/simulation/stop", response_model=SimulatorStatusOut, include_in_schema=False)
 @router.post("/api/v1/banking/simulator/stop", response_model=SimulatorStatusOut, include_in_schema=False)
 async def stop_simulator():
     return await get_simulation_service().stop()
 
 
 @router.get("/simulator/status", response_model=SimulatorStatusOut, summary="Simulator status")
+@router.get("/simulation/status", response_model=SimulatorStatusOut, include_in_schema=False)
 @router.get("/api/v1/banking/simulator/status", response_model=SimulatorStatusOut, include_in_schema=False)
 def simulator_status():
     return get_simulation_service().status()

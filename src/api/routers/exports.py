@@ -194,6 +194,8 @@ def export_inventory(db: Session = Depends(get_session)):
 # Live CSV endpoints
 # ----------------------------------------------------------------------
 def _serialize_tx_row(t: BankingTransaction) -> dict:
+    amount = t.amount if t.amount is not None else t.transaction_amount
+    currency = t.currency or t.transaction_currency or "USD"
     return {
         "transaction_id": t.transaction_id,
         "customer_id": t.customer_id,
@@ -202,7 +204,7 @@ def _serialize_tx_row(t: BankingTransaction) -> dict:
         "country": t.country, "city": t.city,
         "latitude": t.latitude, "longitude": t.longitude,
         "ip_address": t.ip_address,
-        "amount": t.amount, "currency": t.currency,
+        "amount": float(amount or 0.0), "currency": currency,
         "merchant_name": t.merchant_name, "merchant_category": t.merchant_category,
         "scenario": t.scenario,
         "fraud_probability": t.fraud_probability,
@@ -465,8 +467,8 @@ def export_simulation_summary(db: Session = Depends(get_session)):
     ).count()
     avoided_loss = float(
         sum(
-            (row[0] or 0.0)
-            for row in db.query(BankingTransaction.amount)
+            ((row[0] if row[0] is not None else row[1]) or 0.0)
+            for row in db.query(BankingTransaction.amount, BankingTransaction.transaction_amount)
             .filter(
                 BankingTransaction.scenario != "normal",
                 BankingTransaction.decision == "BLOCKED",

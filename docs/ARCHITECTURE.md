@@ -57,5 +57,5 @@ Offline pipeline (scripts/):
 | `src/explainability` | SHAP explainer (global + local + waterfall + API helper) |
 | `src/database` | SQLAlchemy ORM, sessions, CRUD |
 | `src/api` | FastAPI app, schemas, routers, real-time decision engine |
-| `src/dashboard` | Streamlit monitoring console |
+| `src/api/static/dashboard.html` | Integrated live dashboard served by FastAPI at `/dashboard` |
 | `src/utils` | config loader, logger, IO helpers |

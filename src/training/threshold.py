@@ -14,7 +14,6 @@ from dataclasses import dataclass
 
 import numpy as np
 from sklearn.metrics import (
-    f1_score,
     matthews_corrcoef,
     precision_recall_curve,
 )

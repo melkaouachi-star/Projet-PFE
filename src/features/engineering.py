@@ -8,7 +8,7 @@ both in batch (training) and on a live stream (FastAPI inference).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterable, List
+from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
@@ -40,7 +40,7 @@ class FraudFeatureEngineer:
     _median_amount: float = 0.0
     _std_amount: float = 1.0
     _mean_amount: float = 0.0
-    _history: list = field(default_factory=list)   # for streaming use
+    _history: list[dict[str, Any]] = field(default_factory=list)   # for streaming use
 
     # ------------------------------------------------------------------
     # Fit
@@ -87,7 +87,7 @@ class FraudFeatureEngineer:
                 sorted_out[f"Amount_RollStd_{w}"] = amt.rolling(w, min_periods=1).std().fillna(0)
                 if len(sorted_out) > 1:
                     sorted_out[f"Velocity_{w}"] = sorted_out["Time"].rolling(w, min_periods=1).apply(
-                        lambda x: (x.iloc[-1] - x.iloc[0]) if len(x) > 1 else 0, raw=False
+                        self._window_time_delta, raw=False
                     )
                 else:
                     sorted_out[f"Velocity_{w}"] = 0.0
@@ -115,7 +115,7 @@ class FraudFeatureEngineer:
     # ------------------------------------------------------------------
     # Single-row transform for online inference
     # ------------------------------------------------------------------
-    def transform_single(self, row: dict) -> pd.DataFrame:
+    def transform_single(self, row: dict[str, Any]) -> pd.DataFrame:
         """
         Transform a single incoming transaction.
 
@@ -123,7 +123,6 @@ class FraudFeatureEngineer:
         reflect the *streaming* context (recent transactions seen by
         the API).  The buffer is capped at the largest rolling window.
         """
-        df = pd.DataFrame([row])
         # Update history then compute features on a windowed view.
         max_w = max(self.rolling_windows) if self.rolling_windows else 1
         self._history.append(row)
@@ -133,6 +132,12 @@ class FraudFeatureEngineer:
         full = self.transform(context)
         # Only return the last row (the one we want to score).
         return full.iloc[[-1]].reset_index(drop=True)
+
+    @staticmethod
+    def _window_time_delta(window: pd.Series) -> float:
+        if len(window) > 1:
+            return float(window.iloc[-1] - window.iloc[0])
+        return 0.0
 
     @staticmethod
     def _compute_velocity_60s(df: pd.DataFrame) -> pd.Series:

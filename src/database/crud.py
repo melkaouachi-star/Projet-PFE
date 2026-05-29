@@ -16,6 +16,7 @@ from src.database.models import (
     FraudAlert,
     Prediction,
     ShapExplanationRecord,
+    SimulationRun,
     Transaction,
 )
 
@@ -150,7 +151,7 @@ def list_customers(db: Session, limit: int = 100, offset: int = 0) -> List[Banki
 
 
 def record_banking_assessment(
-    db: Session, transaction: dict, assessment: dict
+    db: Session, transaction: dict, assessment: dict, simulation_run_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Persist one (transaction, score) pair.
@@ -170,17 +171,29 @@ def record_banking_assessment(
 
     payload = dict(
         customer_id=str(transaction.get("customer_id", "")),
+        simulation_run_id=simulation_run_id,
         customer_name=transaction.get("customer_name"),
+        customer_age=transaction.get("customer_age"),
+        customer_risk_category=transaction.get("customer_risk_category"),
         timestamp=ts,
         country=transaction.get("country"),
         city=transaction.get("city"),
         latitude=transaction.get("latitude"),
         longitude=transaction.get("longitude"),
         ip_address=transaction.get("ip_address"),
+        device_id=transaction.get("device_id"),
+        browser=transaction.get("browser"),
+        operating_system=transaction.get("operating_system"),
         amount=amount,
         currency=currency,
+        transaction_amount=amount,
+        transaction_currency=currency,
+        transaction_date=transaction.get("transaction_date"),
+        transaction_time=transaction.get("transaction_time"),
         merchant_name=transaction.get("merchant_name"),
         merchant_category=transaction.get("merchant_category"),
+        payment_method=transaction.get("payment_method"),
+        card_type=transaction.get("card_type"),
         scenario=transaction.get("scenario"),
         fraud_probability=float(assessment.get("fraud_probability", 0.0)),
         risk_score=int(assessment.get("risk_score", 0)),
@@ -244,13 +257,14 @@ def record_banking_assessment(
     return {"score": score_row, "alert": alert_row, "shap": shap_row}
 
 
-def list_recent_banking_transactions(db: Session, limit: int = 100) -> List[BankingTransaction]:
-    return (
+def list_recent_banking_transactions(db: Session, limit: int = 100) -> List[dict]:
+    rows = (
         db.query(BankingTransaction)
         .order_by(desc(BankingTransaction.created_at))
         .limit(limit)
         .all()
     )
+    return [_serialize_banking_transaction(row) for row in rows]
 
 
 def list_recent_banking_alerts(db: Session, limit: int = 100) -> List[BankingAlert]:
@@ -294,10 +308,11 @@ def banking_analytics(db: Session) -> Dict[str, Any]:
     suspicious = int(decision_counts.get("SUSPICIOUS", 0)) + int(decision_counts.get("REVIEW", 0))
     approved = int(decision_counts.get("APPROVED", 0))
 
-    total_amount = float(db.query(func.coalesce(func.sum(BankingTransaction.amount), 0.0)).scalar() or 0.0)
+    amount_expr = func.coalesce(BankingTransaction.amount, BankingTransaction.transaction_amount, 0.0)
+    total_amount = float(db.query(func.coalesce(func.sum(amount_expr), 0.0)).scalar() or 0.0)
     avg_risk = float(db.query(func.coalesce(func.avg(BankingTransaction.risk_score), 0.0)).scalar() or 0.0)
     blocked_amount = float(
-        db.query(func.coalesce(func.sum(BankingTransaction.amount), 0.0))
+        db.query(func.coalesce(func.sum(amount_expr), 0.0))
         .filter(BankingTransaction.decision == "BLOCKED")
         .scalar()
         or 0.0
@@ -355,3 +370,126 @@ def _jsonable(value: Any) -> Any:
     if isinstance(value, datetime):
         return value.isoformat()
     return value
+
+
+# ======================================================================
+# Simulation-run lifecycle (Power BI dim_simulation_run)
+# ======================================================================
+def create_simulation_run(
+    db: Session,
+    *,
+    run_id: str,
+    rate_tps: int,
+    fraud_ratio: float,
+    model_version: Optional[str] = None,
+) -> SimulationRun:
+    """Open a new ACTIVE simulation run row."""
+    run = SimulationRun(
+        run_id=run_id,
+        started_at=datetime.utcnow(),
+        status="ACTIVE",
+        rate_tps=int(rate_tps),
+        fraud_ratio=float(fraud_ratio),
+        model_version=model_version,
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+    return run
+
+
+def finalize_simulation_run(db: Session, run_id: str) -> Optional[SimulationRun]:
+    """Close a run and snapshot its aggregate effectiveness metrics.
+
+    Aggregates are recomputed from ``banking_transactions`` filtered by
+    ``simulation_run_id`` so the snapshot always matches the persisted rows
+    (no double counting, no dependence on in-memory counters).
+    """
+    run = db.get(SimulationRun, run_id)
+    if run is None:
+        return None
+
+    base = db.query(BankingTransaction).filter(
+        BankingTransaction.simulation_run_id == run_id
+    )
+    total = base.count()
+    decision_counts = dict(
+        db.query(BankingTransaction.decision, func.count(BankingTransaction.transaction_id))
+        .filter(BankingTransaction.simulation_run_id == run_id)
+        .group_by(BankingTransaction.decision)
+        .all()
+    )
+    blocked = int(decision_counts.get("BLOCKED", 0))
+    suspicious = int(decision_counts.get("SUSPICIOUS", 0)) + int(decision_counts.get("REVIEW", 0))
+    approved = int(decision_counts.get("APPROVED", 0))
+
+    simulated_frauds = base.filter(BankingTransaction.scenario != "normal").count()
+    detected_frauds = base.filter(
+        BankingTransaction.scenario != "normal", BankingTransaction.decision == "BLOCKED"
+    ).count()
+    false_positives = base.filter(
+        BankingTransaction.scenario == "normal", BankingTransaction.decision == "BLOCKED"
+    ).count()
+    amount_expr = func.coalesce(BankingTransaction.amount, BankingTransaction.transaction_amount, 0.0)
+    avoided_loss = float(
+        db.query(func.coalesce(func.sum(amount_expr), 0.0))
+        .filter(
+            BankingTransaction.simulation_run_id == run_id,
+            BankingTransaction.scenario != "normal",
+            BankingTransaction.decision == "BLOCKED",
+        )
+        .scalar()
+        or 0.0
+    )
+
+    run.stopped_at = datetime.utcnow()
+    run.status = "COMPLETED"
+    run.generated_transactions = total
+    run.approved = approved
+    run.suspicious = suspicious
+    run.blocked = blocked
+    run.simulated_frauds = simulated_frauds
+    run.detected_frauds = detected_frauds
+    run.missed_frauds = max(simulated_frauds - detected_frauds, 0)
+    run.false_positives = false_positives
+    run.estimated_avoided_loss = round(avoided_loss, 2)
+    db.commit()
+    db.refresh(run)
+    return run
+
+
+def list_simulation_runs(db: Session, limit: int = 100) -> List[SimulationRun]:
+    return (
+        db.query(SimulationRun)
+        .order_by(desc(SimulationRun.started_at))
+        .limit(limit)
+        .all()
+    )
+
+
+def _serialize_banking_transaction(row: BankingTransaction) -> dict:
+    amount = row.amount if row.amount is not None else (row.transaction_amount or 0.0)
+    currency = row.currency or row.transaction_currency or "USD"
+    return {
+        "transaction_id": row.transaction_id,
+        "customer_id": row.customer_id,
+        "customer_name": row.customer_name,
+        "timestamp": row.timestamp,
+        "country": row.country,
+        "city": row.city,
+        "latitude": row.latitude,
+        "longitude": row.longitude,
+        "ip_address": row.ip_address,
+        "amount": float(amount or 0.0),
+        "currency": currency,
+        "merchant_name": row.merchant_name,
+        "merchant_category": row.merchant_category,
+        "scenario": row.scenario,
+        "fraud_probability": row.fraud_probability,
+        "risk_score": row.risk_score,
+        "fraud_level": row.fraud_level,
+        "decision": row.decision,
+        "transaction_status": row.transaction_status,
+        "model_version": row.model_version,
+        "created_at": row.created_at,
+    }

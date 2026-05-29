@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.api.routers import explain, monitoring, predictions
 from src.api.schemas import HealthOut
@@ -88,12 +91,68 @@ def create_app() -> FastAPI:
     except Exception as exc:  # pragma: no cover - defensive boot guard
         log.exception(f"Exports router not registered: {exc}")
 
+    # Power BI integration endpoints (/api/powerbi/*, Phase 4).
+    # DirectQuery is the canonical path; these JSON endpoints are the
+    # Import/Web-connector fallback and a health surface for the views.
+    try:
+        from src.api.routers import powerbi as powerbi_router  # noqa: WPS433
+
+        app.include_router(powerbi_router.router)
+    except Exception as exc:  # pragma: no cover - defensive boot guard
+        log.exception(f"Power BI router not registered: {exc}")
+
+    static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+        @app.get("/dashboard", tags=["dashboard"])
+        def dashboard():
+            return FileResponse(static_dir / "dashboard.html")
+
+    @app.get("/cost-analysis", tags=["cost-analysis"], include_in_schema=False)
+    def cost_analysis_alias(model: str):
+        return RedirectResponse(url=f"/api/v1/cost-analysis?model={model}", status_code=307)
+
+    @app.get("/optimal-threshold", tags=["cost-analysis"], include_in_schema=False)
+    def optimal_threshold_alias(model: str, strategy: str = "cost"):
+        return RedirectResponse(
+            url=f"/api/v1/optimal-threshold?model={model}&strategy={strategy}",
+            status_code=307,
+        )
+
+    @app.get("/export/simulation", tags=["exports"], include_in_schema=False)
+    def export_simulation_alias():
+        return RedirectResponse(url="/api/v1/export/simulation-summary.csv", status_code=307)
+
+    @app.get("/export/powerbi", tags=["exports"], include_in_schema=False)
+    def export_powerbi_alias():
+        return RedirectResponse(url="/api/v1/export/powerbi.zip", status_code=307)
+
     @app.get("/", tags=["root"])
     def root():
         return {
             "service": "fraud-detection-api",
             "version": cfg.project.version,
             "docs": "/docs",
+            "dashboard": "/dashboard",
+            "banking": {
+                "predict": "/predict",
+                "transactions": "/transactions",
+                "customers": "/customers",
+                "fraud_alerts": "/fraud-alerts",
+                "live_stream": "/live-stream",
+                "websocket": "/ws/live-stream",
+                "cost_analysis": "/api/v1/cost-analysis",
+                "exports": "/api/v1/export/inventory",
+            },
+            "powerbi": {
+                "views": "/api/powerbi/views",
+                "transactions": "/api/powerbi/transactions",
+                "kpis": "/api/powerbi/kpis",
+                "model_benchmark": "/api/powerbi/model-benchmark",
+                "simulation_summary": "/api/powerbi/simulation-summary",
+                "export_bundle": "/api/powerbi/export-bundle",
+            },
         }
 
     @app.get("/health", response_model=HealthOut, tags=["health"])

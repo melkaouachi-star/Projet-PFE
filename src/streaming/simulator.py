@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 
 from src.database import crud
 from src.database.session import SessionLocal
-from src.scoring.dynamic_engine import DynamicFraudScoringEngine, assessment_to_event
+from src.scoring.dynamic_engine import MODEL_VERSION, DynamicFraudScoringEngine, assessment_to_event
 from src.simulation.transactions import TransactionGenerator
 from src.streaming.broker import EventBroker, get_broker
 from src.utils.logger import get_logger
@@ -23,6 +24,7 @@ class SimulatorState:
     generated: int = 0
     started_at: str | None = None
     last_error: str | None = None
+    run_id: str | None = None
 
 
 class SimulationService:
@@ -47,8 +49,27 @@ class SimulationService:
             return self.status()
         self.state.running = True
         self.state.started_at = datetime.utcnow().isoformat()
+        self.state.generated = 0
+        # Open a SimulationRun row so Power BI can slice by discrete run.
+        # Guarded: a DB hiccup here must never prevent the simulator starting.
+        self.state.run_id = f"RUN-{datetime.utcnow():%Y%m%d%H%M%S}-{uuid.uuid4().hex[:6].upper()}"
+        try:
+            with SessionLocal() as db:
+                crud.create_simulation_run(
+                    db,
+                    run_id=self.state.run_id,
+                    rate_tps=self.state.rate_tps,
+                    fraud_ratio=self.state.fraud_ratio,
+                    model_version=MODEL_VERSION,
+                )
+        except Exception as exc:  # pragma: no cover - defensive
+            self.state.last_error = f"run-open failed: {exc}"
+            log.warning(f"Could not open simulation run row: {exc}")
         self._task = asyncio.create_task(self._run(), name="fraud-simulation-service")
-        log.info(f"Started simulation at {self.state.rate_tps} TPS, fraud_ratio={self.state.fraud_ratio:.2f}")
+        log.info(
+            f"Started simulation {self.state.run_id} at {self.state.rate_tps} TPS, "
+            f"fraud_ratio={self.state.fraud_ratio:.2f}"
+        )
         return self.status()
 
     async def stop(self) -> dict:
@@ -59,7 +80,15 @@ class SimulationService:
                 await self._task
             except asyncio.CancelledError:
                 pass
-        log.info("Stopped simulation.")
+        # Close out the run and snapshot its effectiveness metrics.
+        if self.state.run_id:
+            try:
+                with SessionLocal() as db:
+                    crud.finalize_simulation_run(db, self.state.run_id)
+            except Exception as exc:  # pragma: no cover - defensive
+                self.state.last_error = f"run-close failed: {exc}"
+                log.warning(f"Could not finalize simulation run row: {exc}")
+        log.info(f"Stopped simulation {self.state.run_id}.")
         return self.status()
 
     def configure_customers(self, customers: list[dict]) -> None:
@@ -74,6 +103,7 @@ class SimulationService:
             "generated": self.state.generated,
             "started_at": self.state.started_at,
             "last_error": self.state.last_error,
+            "run_id": self.state.run_id,
         }
 
     async def _run(self) -> None:
@@ -90,8 +120,12 @@ class SimulationService:
                     assessment = self.engine.score(transaction)
                     assessment_payload = assessment.as_dict()
                     with SessionLocal() as db:
-                        crud.record_banking_assessment(db, transaction, assessment_payload)
+                        crud.record_banking_assessment(
+                            db, transaction, assessment_payload,
+                            simulation_run_id=self.state.run_id,
+                        )
                     event = assessment_to_event(transaction, assessment)
+                    event["simulation_run_id"] = self.state.run_id
                     await self.broker.publish(event)
                     self.state.generated += 1
             except Exception as exc:

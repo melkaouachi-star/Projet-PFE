@@ -26,7 +26,8 @@ api:
 	$(PYTHON) scripts/run_api.py
 
 dashboard:
-	$(PYTHON) scripts/run_dashboard.py
+	@echo "Dashboard: http://localhost:8000/dashboard"
+	@echo "Start the API with: make api"
 
 stream-demo:
 	$(PYTHON) scripts/simulate_stream.py --n 100 --delay 0.3 --fraud_ratio 0.15

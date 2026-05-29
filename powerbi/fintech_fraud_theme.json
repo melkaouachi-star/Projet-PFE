@@ -1,0 +1,151 @@
+{
+  "name": "FinTech Fraud AI",
+  "$schema": "https://raw.githubusercontent.com/microsoft/powerbi-desktop-samples/main/Report%20Theme%20JSON%20Schema/reportThemeSchema-2.137.json",
+  "dataColors": [
+    "#1565C0",
+    "#38BDF8",
+    "#7DD3FC",
+    "#22C55E",
+    "#F59E0B",
+    "#EF4444",
+    "#102A43",
+    "#94A3B8",
+    "#0EA5E9",
+    "#A855F7",
+    "#14B8A6",
+    "#F97316"
+  ],
+  "background": "#07111F",
+  "secondaryBackground": "#0D1B2A",
+  "tableAccent": "#38BDF8",
+  "foreground": "#F8FAFC",
+  "foregroundNeutralSecondary": "#94A3B8",
+  "foregroundNeutralTertiary": "#1E3A5F",
+  "good": "#22C55E",
+  "neutral": "#F59E0B",
+  "bad": "#EF4444",
+  "maximum": "#EF4444",
+  "center": "#F59E0B",
+  "minimum": "#22C55E",
+  "null": "#102A43",
+  "hyperlink": "#38BDF8",
+  "visited": "#7DD3FC",
+  "textClasses": {
+    "title": {
+      "color": "#F8FAFC",
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 16
+    },
+    "header": {
+      "color": "#F8FAFC",
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12
+    },
+    "callout": {
+      "color": "#38BDF8",
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 32
+    },
+    "label": {
+      "color": "#94A3B8",
+      "fontFace": "Segoe UI",
+      "fontSize": 10
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          { "show": true, "color": { "solid": { "color": "#0D1B2A" } }, "transparency": 0 }
+        ],
+        "border": [
+          { "show": true, "color": { "solid": { "color": "#1E3A5F" } }, "radius": 8 }
+        ],
+        "visualHeader": [
+          { "show": true, "background": { "solid": { "color": "#0D1B2A" } }, "foreground": { "solid": { "color": "#94A3B8" } } }
+        ],
+        "title": [
+          {
+            "show": true,
+            "fontColor": { "solid": { "color": "#F8FAFC" } },
+            "background": { "solid": { "color": "#0D1B2A" } },
+            "alignment": "left",
+            "fontSize": 12,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ],
+        "labels": [
+          { "color": { "solid": { "color": "#F8FAFC" } }, "fontSize": 9, "fontFamily": "Segoe UI" }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          { "color": { "solid": { "color": "#07111F" } }, "transparency": 0 }
+        ],
+        "outspace": [
+          { "color": { "solid": { "color": "#07111F" } }, "transparency": 0 }
+        ]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [
+          { "color": { "solid": { "color": "#38BDF8" } }, "fontSize": 28, "fontFamily": "Segoe UI Semibold" }
+        ],
+        "categoryLabels": [
+          { "show": true, "color": { "solid": { "color": "#94A3B8" } }, "fontSize": 10, "fontFamily": "Segoe UI" }
+        ],
+        "background": [
+          { "show": true, "color": { "solid": { "color": "#102A43" } } }
+        ],
+        "border": [
+          { "show": true, "color": { "solid": { "color": "#1E3A5F" } }, "radius": 10 }
+        ]
+      }
+    },
+    "cardVisual": {
+      "*": {
+        "calloutValue": [
+          { "fontSize": 30, "fontFamily": "Segoe UI Semibold", "color": { "solid": { "color": "#38BDF8" } } }
+        ]
+      }
+    },
+    "kpi": {
+      "*": {
+        "trend": [ { "color": { "solid": { "color": "#38BDF8" } } } ]
+      }
+    },
+    "slicer": {
+      "*": {
+        "background": [ { "show": true, "color": { "solid": { "color": "#102A43" } } } ],
+        "header": [ { "fontColor": { "solid": { "color": "#F8FAFC" } } } ],
+        "items": [ { "fontColor": { "solid": { "color": "#94A3B8" } } } ]
+      }
+    },
+    "tableEx": {
+      "*": {
+        "grid": [
+          {
+            "gridVertical": true, "gridVerticalColor": { "solid": { "color": "#1E3A5F" } },
+            "gridHorizontal": true, "gridHorizontalColor": { "solid": { "color": "#102A43" } },
+            "outlineColor": { "solid": { "color": "#1E3A5F" } }
+          }
+        ],
+        "columnHeaders": [
+          { "fontColor": { "solid": { "color": "#F8FAFC" } }, "backColor": { "solid": { "color": "#102A43" } }, "fontFamily": "Segoe UI Semibold" }
+        ],
+        "values": [
+          { "fontColorPrimary": { "solid": { "color": "#F8FAFC" } }, "backColorPrimary": { "solid": { "color": "#0D1B2A" } },
+            "fontColorSecondary": { "solid": { "color": "#E2E8F0" } }, "backColorSecondary": { "solid": { "color": "#102A43" } } }
+        ]
+      }
+    },
+    "lineChart": {
+      "*": {
+        "valueAxis": [ { "gridlineColor": { "solid": { "color": "#1E3A5F" } } } ]
+      }
+    }
+  }
+}

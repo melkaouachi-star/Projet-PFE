@@ -25,10 +25,10 @@ monitoring dashboard and a full MLOps deployment pipeline.
 - **SHAP** global, local, waterfall, beeswarm and dependence plots.
 - **FastAPI** REST API with `/predict`, `/predict/batch`,
   `/explain`, `/predictions`, `/alerts`, `/stats`, `/health`.
-- **Streamlit** monitoring dashboard with live tables, risk-score
-  histograms and a built-in scoring + SHAP playground.
+- **Integrated FastAPI dashboard** at `/dashboard` with live tables,
+  fraud map, alerts, cost analysis, simulation controls and exports.
 - **SQLAlchemy** ORM with SQLite (dev) / PostgreSQL (prod) backends.
-- **Docker-compose** stack (API + Dashboard + Postgres).
+- **Docker-compose** stack (API with integrated dashboard + Postgres).
 - Deployment guides for **Render, Railway, HuggingFace Spaces, AWS**.
 
 ---
@@ -60,8 +60,8 @@ python scripts/run_shap.py
 # 7. Start the API  (Swagger UI at http://localhost:8000/docs)
 python scripts/run_api.py
 
-# 8. In a second terminal, start the dashboard
-python scripts/run_dashboard.py
+# 8. Open the integrated dashboard
+#    http://localhost:8000/dashboard
 
 # 9. Optional - replay live transactions against the API
 python scripts/simulate_stream.py --n 200 --delay 0.3
@@ -83,10 +83,9 @@ python scripts/simulate_stream.py --n 200 --delay 0.3
 │   ├── figures/            # publication-quality PNGs
 │   └── tables/             # CSV / JSON comparison tables
 ├── scripts/                # run_eda, run_training, run_evaluation, run_shap,
-│                           # run_api, run_dashboard, simulate_stream
+│                           # run_api, simulate_stream
 ├── src/
-│   ├── api/                # FastAPI app, schemas, routers, decision engine
-│   ├── dashboard/          # Streamlit console
+│   ├── api/                # FastAPI app, routers, static live dashboard
 │   ├── data/               # loader, EDA, preprocessor
 │   ├── database/           # SQLAlchemy models + CRUD
 │   ├── evaluation/         # metrics + publication-quality plots
@@ -158,19 +157,12 @@ Content-Type: application/json
 
 ## Dashboard
 
-Run `python scripts/run_dashboard.py` and open
-[http://localhost:8501](http://localhost:8501).
+Run `python scripts/run_api.py` and open
+[http://localhost:8000/dashboard](http://localhost:8000/dashboard).
 
-Four views are available:
-
-1. **Live Monitoring** - real-time table of predictions, alerts,
-   KPI cards (#blocked, #review, #alerts).
-2. **Score a Transaction** - interactive form, posts to `/predict`,
-   shows the decision + risk score + SHAP-derived explanation.
-3. **SHAP Explainer** - synthetic transaction explorer with a
-   horizontal SHAP bar chart.
-4. **Analytics** - decisions over time, risk-score histograms,
-   hourly fraud-rate breakdown.
+The integrated dashboard includes live monitoring, fraud alerts, an
+interactive world map, simulation controls, SHAP-style explanations,
+threshold/cost analysis and Power BI exports.
 
 ---
 

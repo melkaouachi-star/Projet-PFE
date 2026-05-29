@@ -11,8 +11,8 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.simulation.customers import CustomerGenerator
-from src.simulation.transactions import TransactionGenerator
+from src.simulation.customers import CustomerGenerator  # noqa: E402
+from src.simulation.transactions import TransactionGenerator  # noqa: E402
 
 
 def main() -> None:

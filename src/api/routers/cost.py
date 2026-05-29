@@ -209,6 +209,7 @@ def _live_arrays(db: Session, limit: int):
         db.query(
             BankingTransaction.fraud_probability,
             BankingTransaction.amount,
+            BankingTransaction.transaction_amount,
             BankingTransaction.scenario,
         )
         .order_by(BankingTransaction.created_at.desc())
@@ -218,13 +219,13 @@ def _live_arrays(db: Session, limit: int):
     if not rows:
         return None
     fraud_probs, amounts, labels = [], [], []
-    for prob, amount, scenario in rows:
+    for prob, amount, transaction_amount, scenario in rows:
         if prob is None:
             continue
         # Convert the engine's 0-100 fraud_probability to a 0-1 score.
         score = float(prob) / 100.0 if float(prob) > 1.0 else float(prob)
         fraud_probs.append(score)
-        amounts.append(float(amount or 0.0))
+        amounts.append(float((amount if amount is not None else transaction_amount) or 0.0))
         labels.append(0 if (scenario or "normal").lower() == "normal" else 1)
     if not fraud_probs:
         return None

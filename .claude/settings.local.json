@@ -1,8 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell($root = \"C:\\\\Users\\\\hp\\\\OneDrive\\\\Bureau\\\\Memoir PFE\\\\Codage\\\\Projet PFE Code New\"; $dirs = @\\(\"src\",\"src/data\",\"src/features\",\"src/models\",\"src/training\",\"src/evaluation\",\"src/explainability\",\"src/api\",\"src/api/routers\",\"src/database\",\"src/dashboard\",\"src/utils\",\"scripts\",\"notebooks\",\"tests\",\"configs\",\"reports\",\"reports/figures\",\"reports/tables\",\"models_store\",\"data\",\"data/raw\",\"data/processed\",\"logs\",\"docs\",\"docker\"\\); foreach \\($d in $dirs\\) { New-Item -ItemType Directory -Force -Path \\(Join-Path $root $d\\) | Out-Null }; \"OK\")",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\hp\\\\OneDrive\\\\Bureau\\\\Memoir PFE\\\\Codage\\\\Projet PFE Code New\" -Recurse -File | Where-Object { $_.FullName -notmatch \"node_modules\" } | Measure-Object | Select-Object -ExpandProperty Count)"
+      "Bash(netstat -ano)",
+      "Bash(findstr :8000)",
+      "Bash(xxd)",
+      "Bash(grep -vE \"\\\\.\\(pkl|png|csv|parquet\\)$\")"
     ]
   }
 }

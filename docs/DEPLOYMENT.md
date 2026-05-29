@@ -1,9 +1,14 @@
 # Deployment guide
 
+For the current FastAPI-integrated live dashboard, use the detailed Render
+guide first:
+
+- [Render live dashboard deployment guide](RENDER_DEPLOYMENT_GUIDE.md)
+
 The project is **container-native** and ships with a docker-compose
-file that boots the API, the dashboard and a PostgreSQL database in
-one command.  Below are platform-specific guides for the four most
-common targets.
+file that boots the API, the integrated dashboard and a PostgreSQL
+database in one command.  Below are platform-specific guides for the
+four most common targets.
 
 ---
 
@@ -15,8 +20,7 @@ pip install -r requirements.txt
 # and copy it to data/raw/creditcard.csv
 python scripts/run_training.py
 python scripts/run_evaluation.py
-python scripts/run_api.py            # http://localhost:8000/docs
-python scripts/run_dashboard.py      # http://localhost:8501
+python scripts/run_api.py            # http://localhost:8000/docs and /dashboard
 ```
 
 ## 2. Docker Compose (recommended)
@@ -31,11 +35,9 @@ docker compose -f docker/docker-compose.yml up --build
 ## 3. Render
 
 1. Push the repo to GitHub.
-2. Create two **Web Services** on Render:
-   - **API**: `docker/Dockerfile.api`. It binds to Render's `PORT`
-     environment variable, defaulting to `10000`.
-   - **Dashboard**: `docker/Dockerfile.dashboard`, port `8501`,
-     env var `DASHBOARD_API_BASE_URL=https://<api-service>.onrender.com`.
+2. Create one **Web Service** on Render:
+   - **API + Dashboard**: `Dockerfile`. It binds to Render's `PORT`
+     environment variable and serves the dashboard at `/dashboard`.
 3. Provision a **Render PostgreSQL** instance and set
    `DATABASE_URL` on the API service.
 
@@ -50,21 +52,14 @@ persistent monitoring data.
 
 ## 5. HuggingFace Spaces
 
-For a fully-managed *demo* deployment:
-
-- Type: `Streamlit`
-- App file: `src/dashboard/app.py`
-- Hardware: `CPU basic`
-- Set the secret `DASHBOARD_API_BASE_URL` to your API's public URL.
-
-The API itself can run on a separate Space using
-`type: docker` and `Dockerfile.api`.
+For a fully-managed *demo* deployment, use a Docker Space and run the
+same FastAPI service. The dashboard remains available at `/dashboard`.
 
 ## 6. AWS
 
-- Build & push the two images to ECR.
+- Build & push the API image to ECR.
 - API: deploy on **ECS Fargate** behind an ALB.
-- Dashboard: deploy on **App Runner**.
+- Dashboard: served by the API at `/dashboard`.
 - Database: **RDS PostgreSQL**.
 - Static figures + model artefacts: store in **S3** and mount them
   via `models_store/` at startup.
@@ -75,6 +70,5 @@ The API itself can run on a separate Space using
 |----------|---------|
 | `DATABASE_URL` | SQLAlchemy connection string (SQLite default) |
 | `API_HOST`, `API_PORT` | API binding |
-| `DASHBOARD_API_BASE_URL` | URL the dashboard uses to call the API |
 | `FRAUD_CONFIG` | Override path to `configs/config.yaml` |
 | `LOG_LEVEL` | DEBUG / INFO / WARNING |

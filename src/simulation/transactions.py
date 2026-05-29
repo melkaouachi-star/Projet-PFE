@@ -5,6 +5,7 @@ import random
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any
 
 from src.simulation.catalogs import (
     BEHAVIOR_PATTERNS,
@@ -23,7 +24,7 @@ from src.simulation.customers import CustomerGenerator
 @dataclass
 class TransactionGenerator:
     seed: int = 42
-    customers: list[dict] | None = None
+    customers: list[dict[str, Any]] | None = None
     _last_timestamp: datetime = field(default_factory=datetime.utcnow)
 
     def __post_init__(self) -> None:
@@ -36,19 +37,19 @@ class TransactionGenerator:
         rate_tps: int = 10,
         fraud_ratio: float = 0.08,
         scenario: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         customer = self.rng.choice(self.customers or [])
         scenario = scenario or self._choose_scenario(customer, fraud_ratio)
         timestamp = self._next_timestamp(rate_tps, scenario)
         return self._build_transaction(customer, timestamp, scenario)
 
-    def generate_batch(self, count: int, rate_tps: int, fraud_ratio: float) -> list[dict]:
+    def generate_batch(self, count: int, rate_tps: int, fraud_ratio: float) -> list[dict[str, Any]]:
         return [
             self.generate_transaction(rate_tps=rate_tps, fraud_ratio=fraud_ratio)
             for _ in range(count)
         ]
 
-    def _choose_scenario(self, customer: dict, fraud_ratio: float) -> str:
+    def _choose_scenario(self, customer: dict[str, Any], fraud_ratio: float) -> str:
         if customer["risk_profile"] == "FRAUDSTER" and self.rng.random() < 0.55:
             return self.rng.choice(SCENARIOS)
         if self.rng.random() < fraud_ratio:
@@ -66,7 +67,7 @@ class TransactionGenerator:
         self._last_timestamp = self._last_timestamp + timedelta(seconds=1 / rate_tps)
         return self._last_timestamp
 
-    def _build_transaction(self, customer: dict, timestamp: datetime, scenario: str) -> dict:
+    def _build_transaction(self, customer: dict[str, Any], timestamp: datetime, scenario: str) -> dict[str, Any]:
         country, city, lat, lon = self._location(customer, scenario)
         merchant_category = self._merchant_category(customer, scenario)
         merchant_name = self.rng.choice(MERCHANTS[merchant_category])
@@ -121,7 +122,7 @@ class TransactionGenerator:
             "scenario": scenario,
         }
 
-    def _location(self, customer: dict, scenario: str) -> tuple[str, str, float, float]:
+    def _location(self, customer: dict[str, Any], scenario: str) -> tuple[str, str, float, float]:
         if scenario in {"foreign_country", "impossible_travel", "stolen_card_behavior", "account_takeover"}:
             countries = [c for c in COUNTRY_CITIES if c != customer["country"]]
             country = self.rng.choice(countries)
@@ -130,7 +131,7 @@ class TransactionGenerator:
         city, lat, lon = self.rng.choice(COUNTRY_CITIES[country])
         return country, city, lat, lon
 
-    def _merchant_category(self, customer: dict, scenario: str) -> str:
+    def _merchant_category(self, customer: dict[str, Any], scenario: str) -> str:
         if scenario in {"stolen_card_behavior", "bot_generated_fraud", "account_takeover"}:
             return self.rng.choice(["Gift Cards", "Crypto Exchange", "Luxury Goods", "Electronics"])
         if scenario == "anomalous_spending_pattern":
@@ -139,7 +140,7 @@ class TransactionGenerator:
         categories = BEHAVIOR_PATTERNS.get(pattern, BEHAVIOR_PATTERNS["daily_retail"])
         return self.rng.choice(categories)
 
-    def _amount(self, customer: dict, scenario: str, merchant_category: str) -> float:
+    def _amount(self, customer: dict[str, Any], scenario: str, merchant_category: str) -> float:
         avg = customer["average_spending"]
         multiplier = {
             "normal": self.rng.uniform(0.2, 1.8),

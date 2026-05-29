@@ -1,0 +1,126 @@
+powerbi_table,source_view_or_table,column,data_type,description,classification
+fact_transactions,vw_powerbi_live_transactions,transaction_id,text,Unique transaction key (PK of banking_transactions),real_simulated
+fact_transactions,vw_powerbi_live_transactions,simulation_run_id,text,Run that generated the transaction (FK to dim_simulation_run); NULL for manual /predict calls,real_simulated
+fact_transactions,vw_powerbi_live_transactions,customer_id,text,FK to dim_customer (banking_customers),synthetic_context
+fact_transactions,vw_powerbi_live_transactions,customer_name,text,Synthetic customer display name,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,customer_age,whole number,Synthetic customer age,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,customer_risk_category,text,Synthetic customer risk band,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,timestamp,datetime,Business timestamp of the transaction,real_simulated
+fact_transactions,vw_powerbi_live_transactions,transaction_date,text,Date string (YYYY-MM-DD) for dim_date join,real_simulated
+fact_transactions,vw_powerbi_live_transactions,transaction_time,text,Time string (HH:MM[:SS]) for dim_time join,real_simulated
+fact_transactions,vw_powerbi_live_transactions,amount,decimal,Transaction amount (COALESCE amount/transaction_amount),real_simulated
+fact_transactions,vw_powerbi_live_transactions,currency,text,ISO currency code,real_simulated
+fact_transactions,vw_powerbi_live_transactions,merchant_name,text,Synthetic merchant name,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,merchant_category,text,Synthetic merchant category (MCC-like),synthetic_context
+fact_transactions,vw_powerbi_live_transactions,payment_method,text,Synthetic payment method,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,card_type,text,Synthetic card type,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,country,text,Synthetic country (dim_location),synthetic_context
+fact_transactions,vw_powerbi_live_transactions,city,text,Synthetic city (dim_location),synthetic_context
+fact_transactions,vw_powerbi_live_transactions,latitude,decimal,Synthetic latitude for the map visual,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,longitude,decimal,Synthetic longitude for the map visual,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,ip_address,text,Synthetic IP address,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,device_id,text,Synthetic device id,synthetic_context
+fact_transactions,vw_powerbi_live_transactions,scenario,text,Simulation scenario tag (normal or a fraud scenario),real_simulated
+fact_transactions,vw_powerbi_live_transactions,real_fraud_label,whole number,Simulation ground truth: 1 if scenario<>normal else 0. NOT available in real production at decision time,simulation_ground_truth
+fact_transactions,vw_powerbi_live_transactions,fraud_probability,decimal,Dynamic engine fraud probability on a 0..100 scale,model_output
+fact_transactions,vw_powerbi_live_transactions,fraud_probability_pct,decimal,fraud_probability / 100 (0..1) for percentage formatting,model_output
+fact_transactions,vw_powerbi_live_transactions,risk_score,whole number,Composite risk score 0..100 from the scoring engine,model_output
+fact_transactions,vw_powerbi_live_transactions,threshold_used,decimal,Block threshold applied on the 0..100 risk scale (config powerbi.block_threshold = 70),config_constant
+fact_transactions,vw_powerbi_live_transactions,predicted_class,whole number,1 if decision=BLOCKED else 0,model_output
+fact_transactions,vw_powerbi_live_transactions,decision_status,text,APPROVED / REVIEW(SUSPICIOUS) / BLOCKED,model_output
+fact_transactions,vw_powerbi_live_transactions,fraud_level,text,Engine fraud severity label,model_output
+fact_transactions,vw_powerbi_live_transactions,transaction_status,text,Operational status of the transaction,model_output
+fact_transactions,vw_powerbi_live_transactions,estimated_avoided_loss,decimal,amount when (scenario<>normal AND BLOCKED) else 0 (avoided fraud loss),derived_economic
+fact_transactions,vw_powerbi_live_transactions,estimated_false_positive_cost,decimal,12.5 when (scenario=normal AND BLOCKED) else 0 (config powerbi.fp_unit_cost),derived_economic
+fact_transactions,vw_powerbi_live_transactions,model_name,text,Scoring engine / model version (COALESCE model_version),model_output
+fact_transactions,vw_powerbi_live_transactions,created_at,datetime,Row insertion time (used for live ORDER BY / refresh),real_simulated
+fact_fraud_alerts,vw_powerbi_fraud_alerts,alert_id,whole number,Alert PK (banking_alerts.id),real_simulated
+fact_fraud_alerts,vw_powerbi_fraud_alerts,transaction_id,text,FK to fact_transactions,real_simulated
+fact_fraud_alerts,vw_powerbi_fraud_alerts,timestamp,datetime,Alert creation time,real_simulated
+fact_fraud_alerts,vw_powerbi_fraud_alerts,customer_id,text,FK to dim_customer,synthetic_context
+fact_fraud_alerts,vw_powerbi_fraud_alerts,severity,text,LOW / MEDIUM / HIGH / CRITICAL,model_output
+fact_fraud_alerts,vw_powerbi_fraud_alerts,fraud_probability,decimal,Probability at alert time (0..100),model_output
+fact_fraud_alerts,vw_powerbi_fraud_alerts,risk_score,whole number,Risk score at alert time,model_output
+fact_fraud_alerts,vw_powerbi_fraud_alerts,decision_status,text,Decision that raised the alert,model_output
+fact_fraud_alerts,vw_powerbi_fraud_alerts,amount,decimal,Transaction amount,real_simulated
+fact_fraud_alerts,vw_powerbi_fraud_alerts,alert_reason,text,Human readable alert message,model_output
+fact_fraud_alerts,vw_powerbi_fraud_alerts,estimated_avoided_loss,decimal,amount when (scenario<>normal AND BLOCKED) else 0,derived_economic
+fact_fraud_alerts,vw_powerbi_fraud_alerts,model_name,text,Model version of the linked transaction,model_output
+fact_shap,vw_powerbi_shap_explanations,explanation_id,text,transaction_id + rank composite key,model_output
+fact_shap,vw_powerbi_shap_explanations,transaction_id,text,FK to fact_transactions,model_output
+fact_shap,vw_powerbi_shap_explanations,feature_name,text,Name of the feature contributing to the score,shap_output
+fact_shap,vw_powerbi_shap_explanations,feature_value,text,Value of that feature for the transaction,shap_output
+fact_shap,vw_powerbi_shap_explanations,shap_value,decimal,Signed SHAP-style contribution,shap_output
+fact_shap,vw_powerbi_shap_explanations,contribution_direction,text,increases_risk / decreases_risk,shap_output
+fact_shap,vw_powerbi_shap_explanations,explanation_text,text,Business wording derived from the SHAP contribution,business_wording
+fact_shap,vw_powerbi_shap_explanations,rank_importance,whole number,1-based rank of the contribution,shap_output
+fact_shap,vw_powerbi_shap_explanations,base_value,decimal,Engine base value (expected score),shap_output
+dim_customer,banking_customers,customer_id,text,Customer PK,synthetic_context
+dim_customer,banking_customers,full_name,text,Synthetic customer name,synthetic_context
+dim_customer,banking_customers,age,whole number,Synthetic age,synthetic_context
+dim_customer,banking_customers,country,text,Home country,synthetic_context
+dim_customer,banking_customers,city,text,Home city,synthetic_context
+dim_customer,banking_customers,risk_profile,text,LOW / MEDIUM / HIGH risk profile,synthetic_context
+dim_customer,banking_customers,average_spending,decimal,Typical spend baseline,synthetic_context
+dim_customer,banking_customers,fraud_history_count,whole number,Past fraud incidents for the profile,synthetic_context
+fact_model_benchmark,vw_powerbi_model_benchmark,model_name,text,Trained model name (7 models),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,threshold_type,text,Threshold strategy that enriched the economics (cost_optimal),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,threshold_value,decimal,Threshold value for the enriched economics,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,precision,decimal,Precision on the held-out test set,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,recall,decimal,Recall on the held-out test set,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,f1,decimal,F1 score (maps to thesis f1_score),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,mcc,decimal,Matthews correlation coefficient,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,roc_auc,decimal,ROC AUC,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,pr_auc,decimal,Precision-Recall AUC,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,specificity,decimal,True negative rate,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,balanced_accuracy,decimal,Balanced accuracy,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,false_positives,whole number,FP count (fp),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,false_negatives,whole number,FN count (fn),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,tp,whole number,True positives,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,tn,whole number,True negatives,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,total_estimated_cost,decimal,Cost-optimal total cost when cost data is loaded,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,estimated_avoided_loss,decimal,Savings vs default threshold when cost data is loaded,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,model_rank,whole number,1=best (by cost when available else MCC),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,selected_best_model,whole number,1 for the single selected model else 0,benchmark_output
+fact_cost_analysis,vw_powerbi_cost_comparison,model_name,text,Model name,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,threshold_type,text,Strategy (default / f1 / mcc / cost),cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,threshold_value,decimal,Threshold for that strategy,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,true_positives,whole number,TP at that threshold,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,true_negatives,whole number,TN at that threshold,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,false_positives,whole number,FP at that threshold,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,false_negatives,whole number,FN at that threshold,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,fraud_loss_cost,decimal,FN(s) * C_FN component,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,false_positive_cost,decimal,FP(s) * C_FP component,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,total_cost,decimal,C(s) = fraud_loss_cost + false_positive_cost,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,savings_vs_default,decimal,Total cost saved versus threshold 0.50,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,savings_pct_vs_default,decimal,Percentage saving versus threshold 0.50,cost_output
+fact_cost_analysis,vw_powerbi_cost_comparison,is_optimal_threshold,whole number,1 for the cost-optimal strategy row,cost_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,model_name,text,Model name,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,threshold_value,decimal,Swept threshold value,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,precision,decimal,Precision at threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,recall,decimal,Recall at threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,f1,decimal,F1 at threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,mcc,decimal,MCC at threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,total_cost,decimal,Asymmetric total cost at threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,is_f1_optimal,whole number,1 at the F1-optimal threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,is_mcc_optimal,whole number,1 at the MCC-optimal threshold,threshold_output
+fact_threshold_optimization,vw_powerbi_threshold_optimization,is_cost_optimal,whole number,1 at the cost-optimal threshold,threshold_output
+fact_simulation,vw_powerbi_simulation_effectiveness,simulation_run_id,text,Run PK (dim_simulation_run),real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,started_at,datetime,Run start,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,stopped_at,datetime,Run stop,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,status,text,ACTIVE / COMPLETED,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,rate_tps,whole number,Configured transactions per second,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,fraud_ratio,decimal,Configured fraud injection ratio,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,generated_transactions,whole number,Total transactions in the run,real_simulated
+fact_simulation,vw_powerbi_simulation_effectiveness,simulated_frauds,whole number,Ground-truth frauds injected,simulation_ground_truth
+fact_simulation,vw_powerbi_simulation_effectiveness,detected_frauds,whole number,Frauds correctly blocked,derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,missed_frauds,whole number,Frauds not blocked,derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,false_positives,whole number,Legit transactions blocked,derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,estimated_avoided_loss,decimal,Amount of blocked fraud,derived_economic
+fact_simulation,vw_powerbi_simulation_effectiveness,detection_rate,decimal,detected_frauds / simulated_frauds,derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,precision_on_blocked,decimal,detected_frauds / (detected_frauds + false_positives),derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,recall_on_fraud,decimal,detected_frauds / simulated_frauds,derived_metric
+fact_simulation,vw_powerbi_simulation_effectiveness,false_positive_rate,decimal,false_positives / legit transactions,derived_metric
+live_kpis,vw_powerbi_live_kpis,total_transactions,whole number,Single-row live KPI snapshot across all transactions,derived_metric
+dim_moroccan_context,vw_powerbi_moroccan_context,city,text,Moroccan city (synthetic demo only),synthetic_demo
+dim_moroccan_context,vw_powerbi_moroccan_context,data_label,text,Mandatory disclaimer: synthetic demo data not representative of real Moroccan fraud,synthetic_demo
