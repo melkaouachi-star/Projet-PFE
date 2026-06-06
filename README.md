@@ -1,4 +1,4 @@
-# Real-Time Credit-Card Fraud Detection - Master's Thesis Project
+#  Credit-Card Fraud Detection - Master's Thesis Project
 
 A **production-grade**, **publication-level** fraud-detection
 platform combining advanced machine learning, real-time inference,
@@ -29,7 +29,7 @@ monitoring dashboard and a full MLOps deployment pipeline.
   fraud map, alerts, cost analysis, simulation controls and exports.
 - **SQLAlchemy** ORM with SQLite (dev) / PostgreSQL (prod) backends.
 - **Docker-compose** stack (API with integrated dashboard + Postgres).
-- Deployment guides for **Render, Railway, HuggingFace Spaces, AWS**.
+
 
 ---
 
