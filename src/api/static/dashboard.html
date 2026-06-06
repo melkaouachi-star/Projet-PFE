@@ -6,7 +6,7 @@
   <title>Atlas Fraud Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -37,35 +37,43 @@
   <style>
     /* ===== Atlas Fraud Intelligence — Modern FinTech Dark Theme ===== */
     :root {
-      --bg-0: #060912;
-      --bg-1: #0b1020;
-      --bg-2: #111a32;
-      --surface: rgba(20, 28, 51, .72);
-      --surface-2: rgba(28, 38, 66, .55);
-      --surface-solid: #141c33;
-      --ink: #e8eefc;
-      --ink-2: #cfd6e8;
+      --bg-0: #060a16;
+      --bg-1: #0a0f1f;
+      --bg-2: #0e1530;
+      --surface: rgba(13, 19, 38, .72);
+      --surface-2: rgba(20, 28, 52, .55);
+      --surface-solid: #0d1426;
+      --panel: #0a0f1e;
+      --panel-2: #0c1428;
+      --ink: #eaf0fc;
+      --ink-2: #cdd6ec;
       --muted: #8a96b3;
-      --muted-2: #6b7794;
-      --line: rgba(255, 255, 255, .07);
-      --line-2: rgba(255, 255, 255, .12);
+      --muted-2: #65718f;
+      --line: rgba(255, 255, 255, .06);
+      --line-2: rgba(255, 255, 255, .11);
       --blue: #3b82f6;
       --blue-2: #60a5fa;
       --cyan: #22d3ee;
       --violet: #8b5cf6;
       --green: #22c55e;
+      --green-2: #4ade80;
       --orange: #f59e0b;
       --red: #ef4444;
       --pink: #ec4899;
-      --shadow-lg: 0 24px 60px -20px rgba(0, 10, 40, .65), 0 6px 24px -8px rgba(0, 0, 0, .4);
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, .25);
+      --shadow-lg: 0 24px 60px -20px rgba(0, 6, 26, .75), 0 6px 24px -8px rgba(0, 0, 0, .5);
+      --shadow-sm: 0 2px 10px rgba(0, 0, 0, .3);
       --grad-blue: linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%);
       --grad-violet: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-      --grad-green: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      --grad-green: linear-gradient(135deg, #16a34a 0%, #4ade80 100%);
       --grad-orange: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
       --grad-red: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
-      --radius: 16px;
-      --radius-sm: 10px;
+      --glow-green: rgba(34, 197, 94, .55);
+      --glow-blue: rgba(59, 130, 246, .5);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --font-display: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+      --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     }
     [data-theme="light"] {
       --bg-0: #f4f6fb;
@@ -80,12 +88,14 @@
       --muted-2: #94a3b8;
       --line: rgba(15, 23, 42, .08);
       --line-2: rgba(15, 23, 42, .14);
+      --panel: #ffffff;
+      --panel-2: #f6f8fd;
     }
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-family: var(--font-body);
       color: var(--ink);
       background: var(--bg-0);
       min-height: 100vh;
@@ -120,57 +130,60 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(139, 152, 184, .45); }
 
     /* ===== Layout ===== */
-    .app { min-height: 100vh; display: grid; grid-template-columns: 260px minmax(0, 1fr); }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 76px minmax(0, 1fr); }
     .sidebar {
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-      background: linear-gradient(180deg, rgba(11, 16, 32, .92) 0%, rgba(6, 9, 18, .92) 100%);
+      position: sticky; top: 0; height: 100vh; overflow: visible;
+      background: linear-gradient(180deg, rgba(10, 15, 30, .96) 0%, rgba(6, 9, 18, .96) 100%);
       border-right: 1px solid var(--line);
       backdrop-filter: blur(20px);
-      padding: 20px 14px; z-index: 50;
+      padding: 16px 0 16px; z-index: 60;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
-    .brand { display: flex; align-items: center; gap: 12px; padding: 4px 8px 22px; }
+    .brand { display: grid; place-items: center; padding: 2px 0 12px; }
     .brand-mark {
-      width: 42px; height: 42px; border-radius: 12px;
+      width: 44px; height: 44px; border-radius: 14px;
       background: var(--grad-blue);
       display: grid; place-items: center; color: white;
-      box-shadow: 0 8px 24px -6px rgba(59, 130, 246, .55);
+      box-shadow: 0 8px 24px -6px rgba(59, 130, 246, .6);
       position: relative;
     }
     .brand-mark::after {
-      content: ""; position: absolute; inset: 1px; border-radius: 11px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, .15), transparent 50%);
+      content: ""; position: absolute; inset: 1px; border-radius: 13px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .18), transparent 55%);
       pointer-events: none;
     }
-    .brand strong { display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
-    .brand .brand-sub { color: var(--muted); font-size: 11px; margin-top: 2px; font-weight: 500; }
-    .nav-section {
-      color: var(--muted-2); font-size: 10px; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; padding: 14px 12px 6px;
+    .rail-sep { width: 26px; height: 1px; background: var(--line); margin: 5px 0; flex: none; }
+    .rail-spacer { flex: 1 1 auto; }
+    .rail { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+    .rail button {
+      position: relative; width: 46px; height: 46px; border: 0; border-radius: 14px;
+      display: grid; place-items: center; color: var(--muted);
+      background: transparent; transition: background .18s ease, color .18s ease, box-shadow .18s ease;
     }
-    .nav { display: grid; gap: 2px; }
-    .nav button {
-      width: 100%; min-height: 38px; display: flex; align-items: center; gap: 11px;
-      padding: 0 12px; border: 0; border-radius: 10px;
-      color: var(--ink-2); background: transparent; text-align: left;
-      font-size: 13px; font-weight: 500; transition: all .18s ease;
-      position: relative;
+    .rail button:hover { background: rgba(255, 255, 255, .05); color: var(--ink); }
+    .rail button.active {
+      color: var(--ink);
+      background: linear-gradient(160deg, rgba(59, 130, 246, .24), rgba(59, 130, 246, .05));
+      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, .3), 0 8px 20px -10px rgba(59, 130, 246, .8);
     }
-    .nav button:hover { background: rgba(255, 255, 255, .04); color: var(--ink); }
-    .nav button.active {
-      background: linear-gradient(90deg, rgba(59, 130, 246, .18), rgba(59, 130, 246, .04));
-      color: var(--ink); font-weight: 600;
-    }
-    .nav button.active::before {
-      content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px;
+    .rail button.active::before {
+      content: ""; position: absolute; left: -16px; top: 13px; bottom: 13px; width: 3px;
       background: var(--grad-blue); border-radius: 0 3px 3px 0;
     }
-    .nav button i { opacity: .85; flex-shrink: 0; }
-    .nav button.active i { opacity: 1; }
-    .nav-badge {
-      margin-left: auto; background: var(--red); color: white;
-      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
-      min-width: 18px; text-align: center;
+    .rail-dot {
+      position: absolute; top: 8px; right: 8px; min-width: 8px; height: 8px; padding: 0 2px;
+      border-radius: 999px; background: var(--red); border: 2px solid var(--bg-0);
+      font-size: 8px; font-weight: 800; color: white; line-height: 1; display: grid; place-items: center;
     }
+    .rail .tip {
+      position: absolute; left: calc(100% + 14px); top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      white-space: nowrap; background: var(--surface-solid); color: var(--ink);
+      border: 1px solid var(--line-2); border-radius: 10px; padding: 7px 12px;
+      font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow-lg);
+      opacity: 0; pointer-events: none; transition: opacity .16s ease, transform .16s ease; z-index: 90;
+    }
+    .rail button:hover .tip { opacity: 1; transform: translateY(-50%) translateX(0); }
 
     .content { min-width: 0; display: grid; grid-template-rows: 68px minmax(0, 1fr); }
     .topbar {
@@ -488,10 +501,11 @@
     .hero {
       padding: 22px; border-radius: var(--radius);
       background:
-        radial-gradient(80% 100% at 100% 0%, rgba(139, 92, 246, .28), transparent 60%),
-        linear-gradient(120deg, rgba(59, 130, 246, .22), rgba(34, 211, 238, .12));
-      border: 1px solid var(--line-2);
+        radial-gradient(60% 120% at 100% 0%, rgba(59, 130, 246, .14), transparent 62%),
+        var(--panel);
+      border: 1px solid var(--line);
       display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center;
+      position: relative; overflow: hidden;
     }
     .hero h2 { margin: 0 0 8px; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
     .hero p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
@@ -572,9 +586,6 @@
       .hero { grid-template-columns: 1fr; }
     }
     @media (max-width: 1024px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar { position: relative; height: auto; }
-      .nav { grid-template-columns: repeat(2, 1fr); }
       .grid-2 { grid-template-columns: 1fr; }
     }
     @media (max-width: 720px) {
@@ -585,6 +596,197 @@
       .sim-grid { grid-template-columns: repeat(2, 1fr); }
       .hero { padding: 16px; }
       .shap-row { grid-template-columns: 130px 1fr 60px; }
+    }
+    /* ===== Display typography ===== */
+    h1, h2, h3, h4,
+    .topbar h1, .panel-title, .metric-value, .brand strong,
+    .hero h2, .hero-stat-val, .sim-stat-val, .cm-val, .threshold-out,
+    .page-title, .hero-kpi .name, .hero-kpi .big, .rank-head h3, .det-top .v {
+      font-family: var(--font-display);
+    }
+
+    /* ===== Topbar (search · quick-nav · user) ===== */
+    .content { grid-template-rows: 72px minmax(0, 1fr); }
+    .topbar { height: 72px; }
+    .topbar-left { display: flex; align-items: center; gap: 22px; min-width: 0; flex: 1; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .search { position: relative; width: min(300px, 30vw); }
+    .search input {
+      width: 100%; height: 40px; border-radius: 12px; border: 1px solid var(--line-2);
+      background: var(--surface-2); color: var(--ink); padding: 0 14px 0 38px; font-size: 13px;
+      outline: none; transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .search input::placeholder { color: var(--muted-2); }
+    .search input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, .16); }
+    .search i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .quicknav { display: flex; align-items: center; gap: 2px; }
+    .quicknav button {
+      position: relative; background: transparent; border: 0; color: var(--muted);
+      font-size: 13.5px; font-weight: 600; padding: 9px 13px; border-radius: 8px; transition: color .16s ease;
+    }
+    .quicknav button:hover { color: var(--ink-2); }
+    .quicknav button.active { color: var(--ink); }
+    .quicknav button.active::after {
+      content: ""; position: absolute; left: 13px; right: 13px; bottom: -1px; height: 2px;
+      background: var(--grad-blue); border-radius: 2px;
+    }
+    .live-pill {
+      display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px;
+      border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .09em;
+      color: #4ade80; background: rgba(34, 197, 94, .1); border: 1px solid rgba(34, 197, 94, .28);
+    }
+    .live-pill.idle { color: var(--muted); background: rgba(139, 152, 184, .08); border-color: var(--line-2); }
+    .icon-btn {
+      position: relative; width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--line-2);
+      background: var(--surface-2); color: var(--ink-2); display: grid; place-items: center;
+      transition: background .16s ease, color .16s ease;
+    }
+    .icon-btn:hover { background: rgba(255, 255, 255, .07); color: var(--ink); }
+    .icon-btn .count {
+      position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px;
+      border-radius: 999px; background: var(--blue); color: white; font-size: 10px; font-weight: 800;
+      display: grid; place-items: center; border: 2px solid var(--bg-0);
+    }
+    .user-chip { display: flex; align-items: center; gap: 11px; padding-left: 4px; }
+    .user-chip .who { text-align: right; line-height: 1.18; }
+    .user-chip .who b { font-size: 13px; font-weight: 700; display: block; }
+    .user-chip .who span { font-size: 11px; color: var(--muted); }
+    .user-chip .avatar {
+      width: 38px; height: 38px; border-radius: 11px; background: var(--grad-violet); color: white;
+      display: grid; place-items: center; font-weight: 800; font-size: 14px; position: relative; flex-shrink: 0;
+    }
+    .user-chip .pro {
+      position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+      font-size: 8px; font-weight: 800; letter-spacing: .04em; padding: 1px 5px; border-radius: 5px;
+      background: var(--blue); color: white; border: 1px solid var(--bg-0);
+    }
+
+    /* ===== Page header (big title + range) ===== */
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: 30px; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+    .page-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .date-pill {
+      display: inline-flex; align-items: center; gap: 9px; height: 38px; padding: 0 14px;
+      border: 1px solid var(--line-2); border-radius: 11px; background: var(--surface-2);
+      font-size: 12.5px; font-weight: 600; color: var(--ink-2); white-space: nowrap;
+    }
+    .date-pill i { color: var(--muted); }
+
+    /* ===== Lead row: hero chart + ranked rails ===== */
+    .lead { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(330px, 1fr); gap: 18px; }
+    .hero-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 22px 22px 12px; position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ""; position: absolute; top: -45%; left: 28%; width: 60%; height: 90%;
+      background: radial-gradient(closest-side, rgba(34, 197, 94, .15), transparent 70%); pointer-events: none;
+    }
+    .hero-kpi { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; position: relative; }
+    .hero-kpi .lbl { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    .hero-kpi .name { font-size: 22px; font-weight: 700; color: var(--green-2); }
+    .hero-kpi .big { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+    .hero-desc { color: var(--muted); font-size: 13px; margin: 8px 0 4px; position: relative; }
+    .delta { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 5px 11px; border-radius: 999px; }
+    .delta.up { color: #4ade80; background: rgba(34, 197, 94, .12); }
+    .delta.down { color: #f87171; background: rgba(248, 113, 113, .12); }
+
+    /* ===== Ranked rails (critical alerts / top risk) ===== */
+    .rail-stack { display: grid; gap: 18px; align-content: start; }
+    .rank-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .rank-head { display: flex; align-items: center; gap: 10px; padding: 15px 18px 11px; }
+    .rank-head .ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: white; flex-shrink: 0; }
+    .rank-head .ic.red { background: var(--grad-red); }
+    .rank-head .ic.amber { background: var(--grad-orange); }
+    .rank-head h3 { margin: 0; font-size: 15px; font-weight: 700; }
+    .rank-head .more { margin-left: auto; color: var(--muted); font-size: 12px; }
+    .rank-row {
+      display: grid; grid-template-columns: 18px 30px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+      padding: 11px 18px; border-top: 1px solid var(--line); cursor: pointer; transition: background .16s ease;
+    }
+    .rank-row:hover { background: rgba(255, 255, 255, .03); }
+    .rank-row .num { color: var(--muted-2); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .rank-row .ava { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); color: var(--blue-2); }
+    .rank-row .who { min-width: 0; }
+    .rank-row .who b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-row .who span { font-size: 11.5px; color: var(--muted); }
+    .rank-row .amt { text-align: right; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .rank-row .amt.neg { color: #f87171; }
+    .rank-row .amt.pos { color: #4ade80; }
+    .rank-row .amt small { display: block; font-weight: 600; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+    .rank-empty { padding: 26px 18px; text-align: center; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+
+    /* ===== Overview bottom row ===== */
+    .over-bottom { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 18px; }
+    .legend-dots { display: flex; gap: 12px; align-items: center; }
+    .legend-dots span { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); }
+    .legend-dots span::before { content: ""; width: 8px; height: 8px; border-radius: 3px; background: var(--c, var(--blue)); }
+
+    /* ===== Detection KPI card ===== */
+    .det-stat { padding: 16px 0; }
+    .det-stat:first-child { padding-top: 4px; }
+    .det-stat + .det-stat { border-top: 1px solid var(--line); }
+    .det-top { display: flex; align-items: baseline; gap: 10px; }
+    .det-top .v { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .det-lbl { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+    .det-bar { height: 7px; border-radius: 999px; background: rgba(139, 152, 184, .16); overflow: hidden; margin-top: 11px; }
+    .det-bar span { display: block; height: 100%; border-radius: 999px; transition: width .5s ease; }
+
+    /* ===== Fact chips (SHAP / benchmark winner) ===== */
+    .fact-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .fact { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; min-width: 0; }
+    .fact .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fact .v { font-size: 18px; font-weight: 800; margin-top: 3px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ===== SHAP diverging contribution bars ===== */
+    .shap2 { display: grid; gap: 9px; }
+    .shap2-row { display: grid; grid-template-columns: 160px 1fr 52px; gap: 12px; align-items: center; }
+    .shap2-row .nm { font-size: 12.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .shap2-track { position: relative; height: 14px; border-radius: 999px; background: rgba(139, 152, 184, .12); }
+    .shap2-track::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line-2); }
+    .shap2-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; transition: width .4s ease; }
+    .shap2-fill.pos { left: 50%; background: var(--grad-red); }
+    .shap2-fill.neg { right: 50%; background: var(--grad-green); }
+    .shap2-val { font-size: 12.5px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    .shap2-val.pos { color: #f87171; }
+    .shap2-val.neg { color: #4ade80; }
+    .shap-legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); }
+    .shap-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .shap-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    /* ===== Cost-analysis optimal-point hero ===== */
+    .cost-hero {
+      display: grid; grid-template-columns: 1.25fr 2fr; gap: 18px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px 22px; position: relative; overflow: hidden;
+    }
+    .cost-hero::before {
+      content: ""; position: absolute; top: -45%; right: 8%; width: 52%; height: 95%;
+      background: radial-gradient(closest-side, rgba(59, 130, 246, .16), transparent 70%); pointer-events: none;
+    }
+    .ch-main { align-self: center; }
+    .ch-eq { font-family: var(--font-mono); font-size: 22px; font-weight: 600; color: var(--ink); letter-spacing: .01em; }
+    .ch-eq sub { font-size: .7em; }
+    .ch-sub { color: var(--muted); font-size: 12.5px; margin-top: 8px; line-height: 1.5; }
+    .ch-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-content: center; position: relative; }
+    .ch-stats .k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+    .ch-stats .v { font-size: 23px; font-weight: 800; margin-top: 4px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .ch-stats .v.pos { color: #4ade80; }
+    .ch-stats > div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+    @media (max-width: 900px) { .cost-hero { grid-template-columns: 1fr; } .fact-row { grid-template-columns: repeat(2, 1fr) !important; } }
+
+    /* ===== Refonte responsive ===== */
+    @media (max-width: 1180px) {
+      .lead { grid-template-columns: 1fr; }
+      .over-bottom { grid-template-columns: 1fr; }
+      .search { width: 200px; }
+      .quicknav { display: none; }
+    }
+    @media (max-width: 720px) {
+      .app { grid-template-columns: 64px minmax(0, 1fr); }
+      .user-chip .who { display: none; }
+      .page-title { font-size: 24px; }
+      .search { display: none; }
     }
   </style>
 </head>
@@ -622,6 +824,27 @@
     const { useEffect, useMemo, useRef, useState, useCallback } = React;
     const API = window.location.origin;
 
+    /* ===== Chart.js neon-glow plugin (opt-in via options.plugins.glow) ===== */
+    if (window.Chart && !window.__glowRegistered) {
+      window.Chart.register({
+        id: "glow",
+        beforeDatasetsDraw(chart) {
+          const g = chart.options && chart.options.plugins && chart.options.plugins.glow;
+          if (!g || !g.enabled) return;
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.shadowColor = g.color || "rgba(34,197,94,.55)";
+          ctx.shadowBlur = g.blur || 16;
+          ctx.shadowOffsetY = g.offsetY || 0;
+        },
+        afterDatasetsDraw(chart) {
+          const g = chart.options && chart.options.plugins && chart.options.plugins.glow;
+          if (g && g.enabled) chart.ctx.restore();
+        },
+      });
+      window.__glowRegistered = true;
+    }
+
     /* ===== Navigation structure ===== */
     const navGroups = [
       {
@@ -652,6 +875,7 @@
       },
     ];
     const pages = navGroups.flatMap(g => g.items);
+    const quickNav = [["overview", "Overview"], ["transactions", "Transactions"], ["alerts", "Suspicious"], ["benchmark", "Models"]];
 
     /* ===== Helpers ===== */
     async function fetchJson(path, options = {}) {
@@ -1012,6 +1236,25 @@
 
       const decisions = useMemo(() => countDecisions(events), [events]);
       const currentPage = pages.find(p => p[0] === page)?.[1] || "Dashboard";
+      const pageSub = {
+        overview: "Real-time fraud posture across the live transaction stream",
+        transactions: "Every scored transaction with decision, risk score and location",
+        alerts: "Suspicious and blocked transactions flagged for analyst review",
+        benchmark: "Model leaderboard across precision, recall, cost and MCC",
+        best: "Production model selection and confusion matrix",
+        cost: "Asymmetric cost model  C(s) = FN·C_FN + FP·C_FP",
+        threshold: "Decision-threshold sweep and optimal operating point",
+        shap: "Local explanations — why a transaction was flagged",
+        morocco: "Moroccan banking context and geospatial exposure",
+        simulation: "Control the live transaction simulator",
+        exports: "Power BI dataset, CSV inventory and bundle export",
+      }[page] || "Live fraud intelligence";
+      const dateRange = useMemo(() => {
+        const times = events.map(e => new Date(e.timestamp || e.created_at)).filter(d => !Number.isNaN(d.getTime()));
+        if (!times.length) return "Live session";
+        const fmt = d => d.toLocaleDateString([], { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        return fmt(new Date(Math.min.apply(null, times))) + " — " + fmt(new Date(Math.max.apply(null, times)));
+      }, [events]);
       const filtered = useMemo(() => events.filter(row => {
         const s = (filters.search || "").toLowerCase();
         if (filters.decision !== "ALL" && decisionOf(row) !== filters.decision) return false;
@@ -1029,65 +1272,76 @@
       return (
         <div className="app">
           <aside className="sidebar">
-            <div className="brand">
+            <div className="brand" title="Atlas Fraud AI">
               <div className="brand-mark"><i data-lucide="shield-check" size="22"></i></div>
-              <div>
-                <strong>Atlas Fraud AI</strong>
-                <div className="brand-sub">Real-time banking defense</div>
-              </div>
             </div>
-            {navGroups.map(group => (
-              <div key={group.label}>
-                <div className="nav-section">{group.label}</div>
-                <nav className="nav">
+            <div className="rail-sep"></div>
+            {navGroups.map((group, gi) => (
+              <React.Fragment key={group.label}>
+                {gi > 0 && <div className="rail-sep"></div>}
+                <nav className="rail">
                   {group.items.map(([id, label, icon]) => (
-                    <button key={id} className={page === id ? "active" : ""} onClick={() => setPage(id)}>
-                      <i data-lucide={icon} size="16"></i>
-                      <span>{label}</span>
-                      {id === "alerts" && alerts.length > 0 && <span className="nav-badge">{alerts.length > 99 ? "99+" : alerts.length}</span>}
+                    <button key={id} className={page === id ? "active" : ""} onClick={() => setPage(id)} aria-label={label}>
+                      <i data-lucide={icon} size="19"></i>
+                      {id === "alerts" && alerts.length > 0 && <span className="rail-dot">{alerts.length > 9 ? "9+" : alerts.length}</span>}
+                      <span className="tip">{label}</span>
                     </button>
                   ))}
                 </nav>
-              </div>
+              </React.Fragment>
             ))}
-            <div style={{ marginTop: 24, padding: "0 8px" }}>
-              <div style={{ background: "rgba(255,255,255,.03)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 600 }}>
-                  <span className={"status-dot " + (status.running ? "live" : "")}></span>
-                  {status.running ? "Live streaming" : "Stream idle"}
-                </div>
-                <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>
-                  {status.generated || 0} generated · {status.rate_tps || rate} TPS · ratio {Number(status.fraud_ratio ?? fraudRatio).toFixed(2)}
-                </div>
-              </div>
-            </div>
+            <div className="rail-spacer"></div>
+            <nav className="rail">
+              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} aria-label="Toggle theme">
+                <i data-lucide={theme === "dark" ? "sun" : "moon"} size="19"></i>
+                <span className="tip">{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+              </button>
+              <button className={page === "exports" ? "active" : ""} onClick={() => setPage("exports")} aria-label="Settings & export">
+                <i data-lucide="settings" size="19"></i>
+                <span className="tip">Settings &amp; export</span>
+              </button>
+            </nav>
           </aside>
 
           <section className="content">
             <header className="topbar">
-              <div>
-                <h1>{currentPage}</h1>
-                <div className="topbar-sub">
-                  <span className={"status-dot " + (status.running ? "live" : "")}></span>
-                  <span className="mono">{clock.toLocaleTimeString()}</span>
-                  <span>·</span>
-                  <span>WebSocket / SSE live monitoring</span>
+              <div className="topbar-left">
+                <div className="search">
+                  <i data-lucide="search" size="16"></i>
+                  <input placeholder="Search customer, merchant, transaction ID…" value={filters.search}
+                    onChange={e => setFilters({ ...filters, search: e.target.value })}
+                    onKeyDown={e => { if (e.key === "Enter") setPage("transactions"); }} />
                 </div>
+                <nav className="quicknav">
+                  {quickNav.map(([id, label]) => (
+                    <button key={id} className={page === id ? "active" : ""} onClick={() => setPage(id)}>{label}</button>
+                  ))}
+                </nav>
               </div>
-              <div className="top-actions">
-                <div style={{ display: "flex", gap: 8, alignItems: "center", paddingRight: 8, borderRight: "1px solid var(--line)" }}>
-                  <span className="muted" style={{ fontSize: 12 }}>Alerts</span>
-                  {alertCounts.CRITICAL > 0 && <Badge value="CRITICAL" />}
-                  {alertCounts.HIGH > 0 && <span className="badge HIGH">{alertCounts.HIGH} HIGH</span>}
-                  {alertCounts.MEDIUM > 0 && <span className="badge MEDIUM">{alertCounts.MEDIUM} MED</span>}
-                </div>
-                <button className="btn btn-icon ghost" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} title="Toggle theme">
-                  <i data-lucide={theme === "dark" ? "sun" : "moon"} size="16"></i>
+              <div className="topbar-right">
+                <span className={"live-pill " + (status.running ? "" : "idle")}>
+                  <span className={"status-dot " + (status.running ? "live" : "")}></span>
+                  {status.running ? "LIVE" : "IDLE"}
+                </span>
+                <button className="icon-btn" onClick={refreshLive} title="Refresh data"><i data-lucide="refresh-cw" size="17"></i></button>
+                <button className="icon-btn" onClick={() => setPage("alerts")} title="Fraud alerts">
+                  <i data-lucide="bell" size="17"></i>
+                  {alerts.length > 0 && <span className="count">{alerts.length > 99 ? "99+" : alerts.length}</span>}
                 </button>
-                <button className="btn" onClick={refreshLive}><i data-lucide="refresh-cw" size="14"></i>Refresh</button>
+                <div className="user-chip">
+                  <div className="who"><b>Fraud Analyst</b><span>Risk Operations</span></div>
+                  <div className="avatar">FA<span className="pro">SOC</span></div>
+                </div>
               </div>
             </header>
             <main className="page">
+              <div className="page-head">
+                <div>
+                  <h1 className="page-title">{currentPage}</h1>
+                  <div className="page-sub">{pageSub}</div>
+                </div>
+                <div className="date-pill"><i data-lucide="calendar-range" size="15"></i>{dateRange}</div>
+              </div>
               {page === "overview" && <Overview analytics={analytics} decisions={decisions} events={events} alerts={alerts} volumeSeries={volumeSeries} fraudSeries={fraudSeries} status={status} setModalTx={setModalTx} />}
               {page === "transactions" && <Transactions events={filtered} filters={filters} setFilters={setFilters} setSelected={setSelected} setModalTx={setModalTx} flashRef={flashRef} />}
               {page === "alerts" && <AlertsPage alerts={alerts} alertCounts={alertCounts} setModalTx={setModalTx} />}
@@ -1108,33 +1362,267 @@
     }
 
     /* ===== Executive Overview ===== */
+    function volumeTimeline(events) {
+      const map = {};
+      events.forEach(e => {
+        const d = new Date(e.timestamp || e.created_at);
+        const k = Number.isNaN(d.getTime()) ? "now" : d.toISOString().slice(11, 16);
+        map[k] = map[k] || { total: 0, approved: 0, suspicious: 0, blocked: 0 };
+        map[k].total++;
+        const dec = decisionOf(e);
+        if (dec === "BLOCKED") map[k].blocked++;
+        else if (dec === "SUSPICIOUS" || dec === "REVIEW") map[k].suspicious++;
+        else map[k].approved++;
+      });
+      return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0])).slice(-26).map(([label, v]) => ({ label, ...v }));
+    }
+    function computeTrend(arr) {
+      if (!arr || arr.length < 4) return null;
+      const half = Math.floor(arr.length / 2);
+      const older = arr.slice(0, half).reduce((a, b) => a + b, 0);
+      const recent = arr.slice(half).reduce((a, b) => a + b, 0);
+      if (older <= 0) return null;
+      return ((recent - older) / older) * 100;
+    }
+    function heroBarGradient(context) {
+      const chart = context.chart;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) return "rgba(34,197,94,.65)";
+      const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+      g.addColorStop(0, "rgba(22,163,74,.22)");
+      g.addColorStop(1, "rgba(74,222,128,.95)");
+      return g;
+    }
+    function distBars(pairs) {
+      return (context) => {
+        const chart = context.chart, area = chart.chartArea, p = pairs[context.dataIndex] || pairs[0];
+        if (!area) return p[1];
+        const g = chart.ctx.createLinearGradient(0, area.bottom, 0, area.top);
+        g.addColorStop(0, p[0]); g.addColorStop(1, p[1]);
+        return g;
+      };
+    }
+
+    function HeroChart({ analytics, events }) {
+      const total = analytics.total_transactions ?? events.length;
+      const series = useMemo(() => volumeTimeline(events), [events]);
+      const trend = useMemo(() => computeTrend(series.map(s => s.total)), [series]);
+      const labels = series.map(s => s.label);
+      return (
+        <div className="hero-card">
+          <div className="hero-kpi">
+            <div>
+              <div className="lbl">
+                <span className="name">Transactions Monitored</span>
+                <span className="big">{Number(total).toLocaleString()}</span>
+              </div>
+              <div className="hero-desc">Total transactions scored by the dynamic engine during the live session</div>
+            </div>
+            {trend != null && (
+              <span className={"delta " + (trend >= 0 ? "up" : "down")}>
+                <i data-lucide={trend >= 0 ? "trending-up" : "trending-down"} size="14"></i>
+                {Math.abs(trend).toFixed(2)}%
+              </span>
+            )}
+          </div>
+          {series.length > 1 ? (
+            <ChartView type="bar" height={300} data={{
+              labels,
+              datasets: [{
+                label: "Transactions",
+                data: series.map(s => s.total),
+                backgroundColor: heroBarGradient,
+                hoverBackgroundColor: "rgba(134,239,172,1)",
+                borderRadius: 6, borderSkipped: false, maxBarThickness: 22,
+                approved: series.map(s => s.approved),
+                suspicious: series.map(s => s.suspicious),
+                blocked: series.map(s => s.blocked),
+              }],
+            }} options={{
+              plugins: {
+                legend: { display: false },
+                glow: { enabled: true, color: "rgba(34,197,94,.55)", blur: 18, offsetY: 2 },
+                tooltip: {
+                  callbacks: {
+                    title: items => labels[items[0].dataIndex] || "",
+                    label: item => `${item.parsed.y} transactions`,
+                    afterBody: items => {
+                      const i = items[0].dataIndex, d = items[0].dataset;
+                      return ["Approved " + (d.approved[i] || 0), "Suspicious " + (d.suspicious[i] || 0), "Blocked " + (d.blocked[i] || 0)];
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: "#65718f", maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+                y: { grid: { color: "rgba(255,255,255,.04)" }, ticks: { color: "#65718f", maxTicksLimit: 6 }, beginAtZero: true },
+              },
+            }} />
+          ) : (
+            <div className="empty" style={{ height: 300, display: "grid", placeContent: "center" }}>
+              <i data-lucide="bar-chart-3" size="34"></i>
+              <div>Waiting for live transactions. Start the simulator to populate the chart.</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function CriticalAlertsRail({ alerts, onSelect }) {
+      const top = [...alerts].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0)).slice(0, 5);
+      return (
+        <div className="rank-card">
+          <div className="rank-head">
+            <span className="ic red"><i data-lucide="shield-alert" size="16"></i></span>
+            <h3>Critical Fraud Alerts</h3>
+            <span className="more">{alerts.length} active</span>
+          </div>
+          {top.length === 0 && <div className="rank-empty">No alerts yet — the stream is clean.</div>}
+          {top.map((a, i) => (
+            <div className="rank-row" key={a.id || a.transaction_id || i} onClick={() => onSelect && onSelect(a)}>
+              <span className="num">{i + 1}</span>
+              <span className="ava" style={{ color: severityOf(a) === "MEDIUM" ? "var(--orange)" : "var(--red)" }}><i data-lucide="alert-octagon" size="15"></i></span>
+              <span className="who"><b>{a.customer_name || "Unknown"}</b><span>{a.city || "?"}, {a.country || "?"} · risk {Math.round(a.risk_score || 0)}</span></span>
+              <span className="amt neg">{fmtMoney(amountOf(a), currencyOf(a))}<small>{decisionOf(a)}</small></span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function TopRiskRail({ analytics }) {
+      const rows = (analytics.top_countries || []).slice(0, 5);
+      return (
+        <div className="rank-card">
+          <div className="rank-head">
+            <span className="ic amber"><i data-lucide="map-pin" size="16"></i></span>
+            <h3>Top Risk Locations</h3>
+            <span className="more">by volume</span>
+          </div>
+          {rows.length === 0 && <div className="rank-empty">Waiting for geolocated traffic.</div>}
+          {rows.map((r, i) => (
+            <div className="rank-row" key={r.country || i}>
+              <span className="num">{i + 1}</span>
+              <span className="ava"><i data-lucide="globe" size="15"></i></span>
+              <span className="who"><b>{r.country || "Unknown"}</b><span>{r.count} transactions monitored</span></span>
+              <span className="amt" style={{ color: "var(--blue-2)" }}>{r.count}<small>events</small></span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function DistributionCard({ decisions }) {
+      const data = [decisions.APPROVED || 0, decisions.SUSPICIOUS || 0, decisions.REVIEW || 0, decisions.BLOCKED || 0];
+      const any = data.some(v => v > 0);
+      return (
+        <div className="panel">
+          <div className="panel-head">
+            <div className="panel-title"><i data-lucide="bar-chart-big" size="15"></i>Decision Distribution</div>
+            <div className="legend-dots">
+              <span style={{ "--c": "#22c55e" }}>Cleared</span>
+              <span style={{ "--c": "#ef4444" }}>Prevented</span>
+            </div>
+          </div>
+          <div className="panel-body">
+            {any ? (
+              <ChartView type="bar" height={234} data={{
+                labels: ["Approved", "Suspicious", "Review", "Blocked"],
+                datasets: [{
+                  data,
+                  backgroundColor: distBars([["rgba(22,163,74,.28)", "rgba(74,222,128,.95)"], ["rgba(180,120,10,.28)", "rgba(251,191,36,.95)"], ["rgba(37,99,235,.28)", "rgba(96,165,250,.95)"], ["rgba(180,30,40,.28)", "rgba(248,113,113,.95)"]]),
+                  borderRadius: 8, borderSkipped: false, maxBarThickness: 48,
+                }],
+              }} options={{
+                plugins: { legend: { display: false }, glow: { enabled: true, color: "rgba(59,130,246,.4)", blur: 12 } },
+                scales: {
+                  x: { grid: { display: false }, ticks: { color: "#8a96b3" } },
+                  y: { grid: { color: "rgba(255,255,255,.04)" }, ticks: { color: "#65718f", maxTicksLimit: 5 }, beginAtZero: true },
+                },
+              }} />
+            ) : (
+              <div className="empty" style={{ height: 234, display: "grid", placeContent: "center" }}><i data-lucide="bar-chart-big" size="30"></i><div>No decisions recorded yet.</div></div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function FraudStatsCard({ fraudSeries }) {
+      const data = fraudSeries || [];
+      return (
+        <div className="panel">
+          <div className="panel-head"><div className="panel-title"><i data-lucide="activity" size="15"></i>Fraud Statistics</div></div>
+          <div className="panel-body">
+            {data.length > 1 ? (
+              <ChartView type="line" height={234} data={{
+                labels: data.map((_, i) => i + 1),
+                datasets: [{ data, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,.12)", fill: true, tension: .4, pointRadius: 0, borderWidth: 2.5 }],
+              }} options={{
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { display: false } }, y: { grid: { color: "rgba(255,255,255,.04)" }, ticks: { color: "#65718f", maxTicksLimit: 5 }, beginAtZero: true } },
+              }} />
+            ) : (
+              <div className="empty" style={{ height: 234, display: "grid", placeContent: "center" }}><i data-lucide="activity" size="30"></i><div>Collecting fraud signal…</div></div>
+            )}
+          </div>
+          <div className="panel-foot">Flagged transactions (blocked + review) per 5-second window.</div>
+        </div>
+      );
+    }
+
+    function DetectionCard({ analytics, decisions }) {
+      const total = analytics.total_transactions ?? ((decisions.APPROVED || 0) + (decisions.SUSPICIOUS || 0) + (decisions.REVIEW || 0) + (decisions.BLOCKED || 0));
+      const blocked = analytics.blocked ?? decisions.BLOCKED ?? 0;
+      const suspicious = analytics.suspicious ?? decisions.SUSPICIOUS ?? 0;
+      const fraudRate = (analytics.fraud_rate || 0) * 100;
+      const denom = Math.max(1, total);
+      return (
+        <div className="panel">
+          <div className="panel-head"><div className="panel-title"><i data-lucide="shield-check" size="15"></i>Fraud Detection</div></div>
+          <div className="panel-body">
+            <div className="det-stat">
+              <div className="det-top"><span className="v">{Number(blocked).toLocaleString()}</span><span className="metric-trend up"><i data-lucide="shield" size="11"></i>blocked</span></div>
+              <div className="det-lbl">Fraudulent transactions auto-prevented</div>
+              <div className="det-bar"><span style={{ width: `${Math.min(100, (blocked / denom) * 100)}%`, background: "var(--grad-green)" }}></span></div>
+            </div>
+            <div className="det-stat">
+              <div className="det-top"><span className="v">{Number(suspicious).toLocaleString()}</span><span className="metric-trend down" style={{ color: "#fbbf24", background: "rgba(245,158,11,.12)" }}>{fraudRate.toFixed(2)}%</span></div>
+              <div className="det-lbl">Suspicious transactions sent to review</div>
+              <div className="det-bar"><span style={{ width: `${Math.min(100, (suspicious / denom) * 100)}%`, background: "var(--grad-orange)" }}></span></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function Overview({ analytics, decisions, events, alerts, volumeSeries, fraudSeries, status, setModalTx }) {
       const total = analytics.total_transactions ?? events.length;
       const blocked = analytics.blocked ?? decisions.BLOCKED;
       const suspicious = analytics.suspicious ?? decisions.SUSPICIOUS;
       const approved = analytics.approved ?? decisions.APPROVED;
-      const fraudRate = (analytics.fraud_rate || 0) * 100;
       const avoidedLoss = analytics.estimated_avoided_loss || 0;
+      const fpCost = analytics.estimated_fp_cost || 0;
       const avgRisk = useMemo(() => {
         if (!events.length) return 0;
         return events.reduce((a, e) => a + Number(e.risk_score || 0), 0) / events.length;
       }, [events]);
-      const fpCost = analytics.estimated_fp_cost || 0;
       const timelineData = timeline(events);
 
       return (
         <>
-          <section className="hero">
-            <div>
-              <h2>Atlas Fraud Intelligence — live posture</h2>
-              <p>Real-time anomaly scoring, asymmetric-cost decisioning and explainable AI for the Moroccan banking sector. Calibrated stacking ensemble + dynamic risk engine; thresholds derived from the economic cost function C(s) = FN·C_FN + FP·C_FP.</p>
+          <section className="lead">
+            <HeroChart analytics={analytics} events={events} />
+            <div className="rail-stack">
+              <CriticalAlertsRail alerts={alerts} onSelect={setModalTx} />
+              <TopRiskRail analytics={analytics} />
             </div>
-            <div className="hero-stats">
-              <div className="hero-stat"><div className="hero-stat-label">Model</div><div className="hero-stat-val">Stacking + Dynamic</div></div>
-              <div className="hero-stat"><div className="hero-stat-label">Mode</div><div className="hero-stat-val">{status.running ? "Streaming" : "Idle"}</div></div>
-              <div className="hero-stat"><div className="hero-stat-label">Pipeline</div><div className="hero-stat-val">WebSocket · SSE</div></div>
-              <div className="hero-stat"><div className="hero-stat-label">Coverage</div><div className="hero-stat-val">Live · Persisted</div></div>
-            </div>
+          </section>
+
+          <section className="over-bottom">
+            <DistributionCard decisions={decisions} />
+            <FraudStatsCard fraudSeries={fraudSeries} />
+            <DetectionCard analytics={analytics} decisions={decisions} />
           </section>
 
           <section className="metrics">
@@ -1142,14 +1630,8 @@
             <Metric label="Approved" value={Number(approved)} icon="check-circle-2" tone="good" hint="Cleared by engine" />
             <Metric label="Suspicious" value={Number(suspicious)} icon="alert-triangle" tone="warn" hint="Sent to review" />
             <Metric label="Blocked" value={Number(blocked)} icon="shield-x" tone="danger" hint="Auto-prevented" sparkData={fraudSeries} sparkColor="#f87171" />
-            <Metric label="Fraud rate" value={Number(fraudRate)} format="pct" icon="percent" tone="violet" hint="blocked + review" />
-            <Metric label="Avg risk score" value={Number(avgRisk)} icon="gauge" tone="warn" hint="0 to 100 scale" />
-          </section>
-          <section className="metrics" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
             <Metric label="Avoided loss" value={Number(avoidedLoss)} format="money" icon="trending-down" tone="good" hint="Estimated savings" />
-            <Metric label="False-positive cost" value={Number(fpCost)} format="money" icon="trending-up" tone="warn" hint="Customer friction" />
-            <Metric label="Total amount" value={Number(analytics.total_amount || 0)} format="money" icon="circle-dollar-sign" tone="blue" hint="Multi-currency display" />
-            <Metric label="Best model" value="Stacking + Dynamic" icon="badge-check" tone="violet" hint="Selected production model" />
+            <Metric label="Avg risk score" value={Number(avgRisk)} icon="gauge" tone="violet" hint="0 to 100 scale" />
           </section>
 
           <section className="grid-2">
@@ -1161,22 +1643,20 @@
               <FraudMap events={events} setModalTx={setModalTx} />
             </div>
             <div className="stack">
-              <RecentAlerts alerts={alerts} onSelect={setModalTx} />
               <TopLists analytics={analytics} />
+              <div className="panel">
+                <div className="panel-head"><div className="panel-title"><i data-lucide="pie-chart" size="15"></i>Decision Mix</div></div>
+                <div className="panel-body">
+                  <ChartView type="doughnut" height={220} data={{
+                    labels: ["Approved", "Suspicious", "Blocked"],
+                    datasets: [{ data: [decisions.APPROVED, decisions.SUSPICIOUS, decisions.BLOCKED], backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"], borderColor: "rgba(0,0,0,0)", borderWidth: 2 }],
+                  }} options={{ cutout: "64%", plugins: { legend: { position: "bottom" } } }} />
+                </div>
+              </div>
             </div>
           </section>
 
           <section className="grid-3">
-            <div className="panel">
-              <div className="panel-head"><div className="panel-title"><i data-lucide="pie-chart" size="15"></i>Decision Mix</div></div>
-              <div className="panel-body">
-                <ChartView type="doughnut" height={240} data={{
-                  labels: ["Approved", "Suspicious", "Blocked"],
-                  datasets: [{ data: [decisions.APPROVED, decisions.SUSPICIOUS, decisions.BLOCKED], backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"], borderColor: "rgba(0,0,0,0)", borderWidth: 2 }],
-                }} options={{ cutout: "62%", plugins: { legend: { position: "bottom" } } }} />
-              </div>
-              <div className="panel-foot">Distribution of engine decisions across the visible stream window.</div>
-            </div>
             <div className="panel">
               <div className="panel-head"><div className="panel-title"><i data-lucide="bar-chart-3" size="15"></i>Risk Score Distribution</div></div>
               <div className="panel-body">
@@ -1202,6 +1682,16 @@
                 }} />
               </div>
               <div className="panel-foot">Rolling traffic per minute. Spikes correlate with simulator bursts or attack scenarios.</div>
+            </div>
+            <div className="panel">
+              <div className="panel-head"><div className="panel-title"><i data-lucide="circle-dollar-sign" size="15"></i>Economic Impact</div></div>
+              <div className="panel-body stack" style={{ gap: 14 }}>
+                <div><div className="metric-label">Avoided loss</div><div className="metric-value" style={{ color: "#4ade80" }}>{fmtMoney(avoidedLoss, "USD")}</div></div>
+                <div className="divider"></div>
+                <div><div className="metric-label">False-positive cost</div><div className="metric-value" style={{ color: "#fbbf24" }}>{fmtMoney(fpCost, "USD")}</div></div>
+                <div className="divider"></div>
+                <div><div className="metric-label">Total amount monitored</div><div className="metric-value">{fmtMoney(analytics.total_amount || 0, "USD")}</div></div>
+              </div>
             </div>
           </section>
         </>
@@ -1370,6 +1860,14 @@
     function BestModel({ cost, computeCost }) {
       const opt = cost?.optima?.cost;
       const cmDemo = { tp: 412, tn: 28342, fp: 154, fn: 47 };
+      const cm = useMemo(() => {
+        if (!cost?.sweep || !opt) return null;
+        const t = Number(opt.threshold);
+        const row = cost.sweep.reduce((b, r) => Math.abs(r.threshold - t) < Math.abs((b?.threshold ?? 9) - t) ? r : b, null);
+        return row && row.tp != null ? { tp: row.tp, tn: row.tn, fp: row.fp, fn: row.fn } : null;
+      }, [cost, opt]);
+      const cmShown = cm || cmDemo;
+      const cmLive = !!cm;
       return (
         <div className="stack">
           <section className="hero">
@@ -1400,13 +1898,13 @@
               </div>
               <div className="panel-body">
                 <div className="cm">
-                  <div className="cm-cell tp"><div className="cm-val">{cmDemo.tp}</div><div className="cm-label">True Positive (fraud caught)</div></div>
-                  <div className="cm-cell fn"><div className="cm-val">{cmDemo.fn}</div><div className="cm-label">False Negative (fraud missed)</div></div>
-                  <div className="cm-cell fp"><div className="cm-val">{cmDemo.fp}</div><div className="cm-label">False Positive (customer friction)</div></div>
-                  <div className="cm-cell tn"><div className="cm-val">{cmDemo.tn}</div><div className="cm-label">True Negative (clean approved)</div></div>
+                  <div className="cm-cell tp"><div className="cm-val">{cmShown.tp}</div><div className="cm-label">True Positive (fraud caught)</div></div>
+                  <div className="cm-cell fn"><div className="cm-val">{cmShown.fn}</div><div className="cm-label">False Negative (fraud missed)</div></div>
+                  <div className="cm-cell fp"><div className="cm-val">{cmShown.fp}</div><div className="cm-label">False Positive (customer friction)</div></div>
+                  <div className="cm-cell tn"><div className="cm-val">{cmShown.tn}</div><div className="cm-label">True Negative (clean approved)</div></div>
                 </div>
               </div>
-              <div className="panel-foot">Validation-fold confusion matrix at the cost-optimal threshold. Lower FN = fewer missed frauds.</div>
+              <div className="panel-foot">{cmLive ? "Live confusion matrix at the cost-optimal threshold s*, computed from the active sweep." : "Indicative validation-fold matrix — press Recompute to populate it from live data."} Lower FN = fewer missed frauds.</div>
             </div>
             <div className="panel">
               <div className="panel-head"><div className="panel-title"><i data-lucide="line-chart" size="15"></i>ROC & PR curves</div></div>
@@ -1474,6 +1972,7 @@
           </section>
           {cost ? (
             <>
+              <CostHero cost={cost} />
               <section className="metrics" style={{ gridTemplateColumns: "repeat(6, 1fr)" }}>
                 <Metric label="Default cost" value={Number(cost.optima.default.total_cost)} format="money" icon="square" tone="warn" />
                 <Metric label="F1-optimal cost" value={Number(cost.optima.f1.total_cost)} format="money" icon="target" tone="blue" />
@@ -1530,6 +2029,25 @@
       };
     }
 
+    function CostHero({ cost }) {
+      const c = cost.optima.cost, d = cost.optima.default;
+      const savings = (Number(d.total_cost) || 0) - (Number(c.total_cost) || 0);
+      const pctCut = d.total_cost ? (savings / Number(d.total_cost)) * 100 : 0;
+      return (
+        <section className="cost-hero">
+          <div className="ch-main">
+            <div className="ch-eq">C(s) = FN(s)·C<sub>FN</sub> + FP(s)·C<sub>FP</sub></div>
+            <div className="ch-sub">Economic minimum located across the live threshold sweep — the cost-optimal operating point s*, not the default 0.50.</div>
+          </div>
+          <div className="ch-stats">
+            <div><div className="k">Optimal threshold s*</div><div className="v">{Number(c.threshold).toFixed(2)}</div></div>
+            <div><div className="k">Cost at s*</div><div className="v">{fmtMoney(c.total_cost, cost.currency)}</div></div>
+            <div><div className="k">Saved vs 0.50</div><div className={"v " + (savings >= 0 ? "pos" : "")}>{savings >= 0 ? "−" : "+"}{fmtMoney(Math.abs(savings), cost.currency)}<span style={{ fontSize: 12, fontWeight: 700, marginLeft: 6 }}>({pctCut.toFixed(1)}%)</span></div></div>
+          </div>
+        </section>
+      );
+    }
+
     /* ===== Threshold Optimization ===== */
     function ThresholdPage({ cost, computeCost }) {
       const [threshold, setThreshold] = useState(0.5);
@@ -1537,6 +2055,7 @@
         if (!cost?.sweep) return null;
         return cost.sweep.reduce((best, r) => Math.abs(r.threshold - threshold) < Math.abs((best?.threshold ?? 9) - threshold) ? r : best, null);
       }, [cost, threshold]);
+      useEffect(() => { const s = cost?.optima?.cost?.threshold; if (s != null) setThreshold(Number(s)); }, [cost?.optima?.cost?.threshold]);
       return (
         <div className="stack">
           <section className="toolbar">
@@ -1626,6 +2145,7 @@
       ];
       const sorted = [...models].sort((a, b) => b.f1 - a.f1);
       const top = sorted.slice(0, 4);
+      const best = models.find(m => m.best) || sorted[0];
       return (
         <div className="stack">
           <section className="toolbar">
@@ -1637,6 +2157,17 @@
               <div className="muted" style={{ marginTop: 4 }}>TimeSeriesSplit · imbalanced-learning · technical + economic + interpretability criteria.</div>
             </div>
             <a className="btn primary" href="/api/v1/export/model-benchmark.csv"><i data-lucide="download" size="14"></i>Download CSV</a>
+          </section>
+
+          <section className="fact-row" style={{ gridTemplateColumns: "1.6fr repeat(4, 1fr)" }}>
+            <div className="fact" style={{ borderColor: "rgba(34,197,94,.3)", background: "rgba(34,197,94,.06)" }}>
+              <div className="k"><i data-lucide="trophy" size="12" style={{ verticalAlign: "-1px", marginRight: 5, color: "#4ade80" }}></i>Production winner</div>
+              <div className="v" style={{ fontSize: 18 }}>{best.name}</div>
+            </div>
+            <div className="fact"><div className="k">F1 score</div><div className="v">{best.f1.toFixed(3)}</div></div>
+            <div className="fact"><div className="k">MCC</div><div className="v">{best.mcc.toFixed(3)}</div></div>
+            <div className="fact"><div className="k">PR-AUC</div><div className="v">{best.prAuc.toFixed(3)}</div></div>
+            <div className="fact"><div className="k">Total cost</div><div className="v">{fmtMoney(best.cost, "USD")}</div></div>
           </section>
 
           <section className="grid-2">
@@ -1848,8 +2379,25 @@
 
     /* ===== SHAP / Explainability ===== */
     function ShapPage({ selected, events, setSelected }) {
-      const reasons = selected?.risk_contribution_score || selected?.dynamic_features || {};
+      const [exp, setExp] = useState(null);
+      const [expLoading, setExpLoading] = useState(false);
+      useEffect(() => {
+        let cancelled = false;
+        const tid = selected?.transaction_id;
+        if (!tid) { setExp(null); return; }
+        setExpLoading(true);
+        fetchJson("/shap-explanation?transaction_id=" + encodeURIComponent(tid))
+          .then(d => { if (!cancelled) setExp(d); })
+          .catch(() => { if (!cancelled) setExp(null); })
+          .finally(() => { if (!cancelled) setExpLoading(false); });
+        return () => { cancelled = true; };
+      }, [selected?.transaction_id]);
+      const reasons = (exp && exp.risk_contribution_score && Object.keys(exp.risk_contribution_score).length)
+        ? exp.risk_contribution_score
+        : (selected?.risk_contribution_score || selected?.dynamic_features || {});
       const reasonList = Object.entries(reasons).slice(0, 10);
+      const maxAbs = Math.max(1, ...reasonList.map(([, d]) => Math.abs(Number((d && d.risk_points) || 0))));
+      const topReasons = (exp && exp.top_reasons && exp.top_reasons.length && exp.top_reasons[0] !== "No explanation was found for this transaction.") ? exp.top_reasons : null;
       const explanationSentence = selected ? buildExplanation(selected, reasonList) : "Select a transaction to see its decision rationale.";
       return (
         <div className="stack">
@@ -1864,29 +2412,42 @@
                   <div className="empty"><i data-lucide="brain" size="32"></i><div>Select a live transaction.</div></div>
                 ) : (
                   <>
-                    <div className="alert-row" style={{ marginBottom: 10 }}>
-                      <div>
-                        <strong style={{ fontSize: 15 }}>{selected.customer_name}</strong>
-                        <div className="muted" style={{ fontSize: 12 }}>{selected.fraud_level || ""} · fraud {pct(selected.fraud_probability)}</div>
-                      </div>
-                      <Badge value={decisionOf(selected)} />
+                    <div className="fact-row">
+                      <div className="fact"><div className="k">Fraud probability</div><div className="v" style={{ color: "#f87171" }}>{pct(selected.fraud_probability)}</div></div>
+                      <div className="fact"><div className="k">Risk score</div><div className="v">{Math.round(selected.risk_score || 0)}</div></div>
+                      <div className="fact"><div className="k">Threshold</div><div className="v">{selected.threshold != null ? Number(selected.threshold).toFixed(2) : "—"}</div></div>
+                      <div className="fact"><div className="k">Decision</div><div className="v" style={{ fontSize: 14, marginTop: 6 }}><Badge value={decisionOf(selected)} /></div></div>
                     </div>
                     <div style={{ padding: 14, background: "rgba(59,130,246,.08)", border: "1px solid rgba(59,130,246,.22)", borderRadius: 12, fontSize: 13, lineHeight: 1.6, color: "var(--ink-2)" }}>
                       <strong style={{ color: "var(--blue-2)" }}>Why this decision: </strong>{explanationSentence}
                     </div>
+                    {topReasons && (
+                      <div className="pill-list" style={{ marginTop: 10 }}>
+                        {topReasons.slice(0, 5).map((r, i) => <span className="pill" key={i}>{r}</span>)}
+                      </div>
+                    )}
                     <div className="divider" style={{ margin: "16px 0" }}></div>
-                    <div style={{ marginBottom: 8, fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".07em" }}>Risk contributions</div>
-                    {reasonList.length === 0 && <div className="muted">No risk-contribution payload available.</div>}
-                    {reasonList.map(([name, detail]) => {
-                      const v = Number(detail.risk_points || 0);
-                      return (
-                        <div className="shap-row" key={name}>
-                          <span className="name">{name.replaceAll("_", " ")}</span>
-                          <div className={"shap-bar " + (v >= 0 ? "" : "pos")}><span style={{ width: `${Math.min(100, Math.abs(v))}%` }}></span></div>
-                          <span className="val">{v >= 0 ? "+" : ""}{v.toFixed(0)}</span>
-                        </div>
-                      );
-                    })}
+                    <div className="alert-row" style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".07em" }}>Risk contributions</div>
+                      <div className="shap-legend">
+                        <span><i style={{ background: "var(--red)" }}></i>increases risk</span>
+                        <span><i style={{ background: "var(--green)" }}></i>reduces risk</span>
+                      </div>
+                    </div>
+                    {reasonList.length === 0 && <div className="muted">{expLoading ? "Loading persisted explanation…" : "No risk-contribution payload persisted for this transaction."}</div>}
+                    <div className="shap2">
+                      {reasonList.map(([name, detail]) => {
+                        const v = Number((detail && detail.risk_points) || 0);
+                        const w = (Math.abs(v) / maxAbs) * 50;
+                        return (
+                          <div className="shap2-row" key={name}>
+                            <span className="nm">{name.replaceAll("_", " ")}</span>
+                            <div className="shap2-track"><span className={"shap2-fill " + (v >= 0 ? "pos" : "neg")} style={{ width: `${w}%` }}></span></div>
+                            <span className={"shap2-val " + (v >= 0 ? "pos" : "neg")}>{v >= 0 ? "+" : "−"}{Math.abs(v).toFixed(0)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </>
                 )}
               </div>

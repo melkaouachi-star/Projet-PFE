@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+catboost,default_0.50,0.5,57,4,56883,18,0.9344,0.76,0.8382,0.8425,0.8011,0.9262,983.96,50.0,1033.96,0.0,0.0
+catboost,f1_optimal,0.48,57,4,56883,18,0.9344,0.76,0.8382,0.8425,0.8011,0.9262,983.96,50.0,1033.96,0.0,0.0
+catboost,mcc_optimal,0.48,57,4,56883,18,0.9344,0.76,0.8382,0.8425,0.8011,0.9262,983.96,50.0,1033.96,0.0,0.0
+catboost,cost_optimal,0.48,57,4,56883,18,0.9344,0.76,0.8382,0.8425,0.8011,0.9262,983.96,50.0,1033.96,0.0,0.0

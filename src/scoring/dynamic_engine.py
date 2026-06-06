@@ -42,7 +42,7 @@ class FraudAssessment:
     alert_severity: str
     alert_message: str
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, Any]:
         feature_names = [c.feature_name for c in self.contributions]
         shap_values = [round(c.shap_value, 4) for c in self.contributions]
         contribution_score = {
@@ -135,9 +135,9 @@ class DynamicFraudScoringEngine:
     def __init__(self, block_threshold: float = 70.0, review_threshold: float = 45.0):
         self.block_threshold = block_threshold
         self.review_threshold = review_threshold
-        self._customer_history: dict[str, deque[dict]] = defaultdict(lambda: deque(maxlen=200))
+        self._customer_history: dict[str, deque[dict[str, Any]]] = defaultdict(lambda: deque(maxlen=200))
 
-    def score(self, transaction: dict) -> FraudAssessment:
+    def score(self, transaction: dict[str, Any]) -> FraudAssessment:
         tx = dict(transaction)
         customer_id = str(tx.get("customer_id", "unknown"))
         timestamp = _coerce_datetime(tx.get("timestamp"))
@@ -312,7 +312,7 @@ class DynamicFraudScoringEngine:
         }
         return len({ip for ip in ips if ip})
 
-    def _impossible_travel(self, customer_id: str, tx: dict) -> tuple[float, float, float] | None:
+    def _impossible_travel(self, customer_id: str, tx: dict[str, Any]) -> tuple[float, float, float] | None:
         history = self._customer_history[customer_id]
         if not history:
             return None
@@ -358,7 +358,7 @@ class DynamicFraudScoringEngine:
         return "Low Risk", "APPROVED", "APPROVED"
 
 
-def assessment_to_event(transaction: dict, assessment: FraudAssessment) -> dict:
+def assessment_to_event(transaction: dict[str, Any], assessment: FraudAssessment) -> dict[str, Any]:
     """Merge the original transaction and score into one dashboard event."""
     payload = dict(transaction)
     if isinstance(payload.get("timestamp"), datetime):
@@ -392,7 +392,7 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * radius_km * asin(sqrt(a))
 
 
-def assessment_dict(transaction: dict, assessment: FraudAssessment) -> dict:
+def assessment_dict(transaction: dict[str, Any], assessment: FraudAssessment) -> dict[str, Any]:
     """JSON-friendly detail payload used by REST responses and tests."""
     out = assessment_to_event(transaction, assessment)
     out["contributions"] = [asdict(c) for c in assessment.contributions]

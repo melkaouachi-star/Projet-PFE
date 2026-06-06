@@ -14,14 +14,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.exc import OperationalError
 
 from src.api.routers import explain, monitoring, predictions
 from src.api.schemas import HealthOut
-from src.database.session import init_db
+from src.database.session import engine, init_db
 from src.utils.config import get_config
 from src.utils.logger import get_logger
 
 log = get_logger("api.main")
+
+
+def _redact_database_url(url: str) -> str:
+    if "://" not in url or "@" not in url:
+        return url
+    scheme, rest = url.split("://", 1)
+    credentials, host = rest.split("@", 1)
+    user = credentials.split(":", 1)[0]
+    return f"{scheme}://{user}:***@{host}"
 
 
 @asynccontextmanager
@@ -32,6 +42,14 @@ async def lifespan(app: FastAPI):
     log.info("Starting fraud detection API ...")
     try:
         init_db()
+    except OperationalError as exc:
+        log.error(
+            "Database initialisation failed. PostgreSQL is configured at "
+            f"{_redact_database_url(str(engine.url))}, but the server is not reachable. "
+            "For local Power BI DirectQuery, start Docker Desktop, then run: "
+            "docker compose -f docker/docker-compose.yml up -d db"
+        )
+        log.error(f"Database driver error: {exc.orig if hasattr(exc, 'orig') else exc}")
     except Exception as exc:
         log.exception(f"Database initialisation failed: {exc}")
     log.info(f"API ready -> http://{host}:{port}/docs "

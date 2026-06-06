@@ -45,6 +45,70 @@ Website simulation bot
 6. Apply the theme: View → Themes → Browse → `powerbi/fintech_fraud_theme.json`.
 7. Add the measures from `powerbi/dax_measures.md` (host them on a `_Measures` table).
 
+### B.1 Local Docker connection settings
+
+For the local PostgreSQL container in this project, use:
+
+```text
+Server: localhost
+Port: 5432
+Database: fraud_db
+User name: fraud
+Password: fraud
+Data connectivity mode: DirectQuery
+```
+
+If Power BI asks for a single server field, use:
+
+```text
+localhost:5432
+```
+
+### B.2 Fix: "SSL connection requested. No SSL enabled connection"
+
+The local Docker PostgreSQL service is intended for local development and does
+not require SSL. If Power BI shows:
+
+```text
+PostgreSQL: SSL connection requested. No SSL enabled connection from this host is configured.
+```
+
+do this in Power BI Desktop:
+
+1. Click **Modifier** in the error window.
+2. Go to **Advanced options**.
+3. Disable **Encrypt connection** / **Require SSL** if the option is visible.
+4. If there is a connection string or advanced statement field, add:
+
+```text
+SSL Mode=Disable
+```
+
+or, depending on the connector UI:
+
+```text
+sslmode=disable
+```
+
+5. Reconnect with:
+
+```text
+Server: localhost:5432
+Database: fraud_db
+User: fraud
+Password: fraud
+```
+
+If Power BI keeps the old SSL setting, clear cached credentials:
+
+```text
+File -> Options and settings -> Data source settings
+-> select localhost / localhost:5432 / fraud_db
+-> Clear Permissions
+```
+
+Then connect again and choose **DirectQuery**.
+
 ## C. Automatic page refresh (near-real-time)
 
 DirectQuery supports **Automatic Page Refresh (APR)**:

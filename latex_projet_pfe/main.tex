@@ -1,0 +1,33 @@
+% !TEX program = tectonic
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage[french,english]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+\setcounter{secnumdepth}{-2}
+\setcounter{tocdepth}{3}
+\graphicspath{{figures/}}
+\emergencystretch=3em
+\sloppy
+
+\title{Analyse Big Data des comportements suspects dans les paiements électroniques}
+\author{}
+\date{Année universitaire 2024--2025}
+
+\begin{document}
+\selectlanguage{french}
+\input{chapters/content.tex}
+\end{document}

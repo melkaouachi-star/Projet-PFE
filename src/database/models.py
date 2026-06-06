@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 from sqlalchemy import (
     JSON,
@@ -13,9 +15,18 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    func,
 )
 
-from src.database.session import Base
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.database.session import Base  # noqa: E402
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class Decision(str, enum.Enum):
@@ -30,10 +41,10 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     external_id = Column(String(64), index=True, nullable=True)
-    time_seconds = Column(Float, nullable=False)
-    amount = Column(Float, nullable=False)
+    time_seconds: Column[float] = Column(Float, nullable=False)
+    amount: Column[float] = Column(Float, nullable=False)
     raw_payload = Column(JSON, nullable=False)
-    received_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    received_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class Prediction(Base):
@@ -43,12 +54,12 @@ class Prediction(Base):
     id = Column(Integer, primary_key=True, index=True)
     transaction_id = Column(Integer, index=True, nullable=False)
     model_name = Column(String(64), nullable=False)
-    fraud_probability = Column(Float, nullable=False)
+    fraud_probability: Column[float] = Column(Float, nullable=False)
     risk_score = Column(Integer, nullable=False)
-    threshold = Column(Float, nullable=False)
+    threshold: Column[float] = Column(Float, nullable=False)
     decision = Column(Enum(Decision), nullable=False)
     explanation = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class FraudAlert(Base):
@@ -61,7 +72,7 @@ class FraudAlert(Base):
     severity = Column(String(16), nullable=False, default="HIGH")
     message = Column(Text, nullable=False)
     acknowledged = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 # ======================================================================
@@ -85,16 +96,19 @@ class BankingCustomer(Base):
     age = Column(Integer, nullable=True)
     country = Column(String(64), nullable=True, index=True)
     city = Column(String(64), nullable=True)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
+    latitude: Column[float] = Column(Float, nullable=True)
+    longitude: Column[float] = Column(Float, nullable=True)
     account_age_days = Column(Integer, nullable=True)
-    average_spending = Column(Float, nullable=True)
+    average_spending: Column[float] = Column(Float, nullable=True)
     risk_profile = Column(String(32), nullable=True, index=True)
     behavior_pattern = Column(String(64), nullable=True)
     known_devices = Column(JSON, nullable=True)
     usual_countries = Column(JSON, nullable=True)
     fraud_history_count = Column(Integer, nullable=True, default=0)
-    updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(
+        DateTime, default=utc_now, server_default=func.now(), nullable=False
+    )
+    updated_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class BankingTransaction(Base):
@@ -110,15 +124,15 @@ class BankingTransaction(Base):
     timestamp = Column(DateTime, nullable=True, index=True)
     country = Column(String(64), nullable=True, index=True)
     city = Column(String(64), nullable=True)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
+    latitude: Column[float] = Column(Float, nullable=True)
+    longitude: Column[float] = Column(Float, nullable=True)
     ip_address = Column(String(64), nullable=True)
     device_id = Column(String(96), nullable=True)
     browser = Column(String(64), nullable=True)
     operating_system = Column(String(64), nullable=True)
-    amount = Column(Float, nullable=False)
+    amount: Column[float] = Column(Float, nullable=False)
     currency = Column(String(8), nullable=True, default="USD")
-    transaction_amount = Column(Float, nullable=True)
+    transaction_amount: Column[float] = Column(Float, nullable=True)
     transaction_currency = Column(String(8), nullable=True)
     transaction_date = Column(String(16), nullable=True)
     transaction_time = Column(String(16), nullable=True)
@@ -131,14 +145,14 @@ class BankingTransaction(Base):
     # run that produced it. Nullable so manual /predict calls and pre-existing
     # rows remain valid. Indexed for "filter by run" slicers in Power BI.
     simulation_run_id = Column(String(48), nullable=True, index=True)
-    fraud_probability = Column(Float, nullable=True)
+    fraud_probability: Column[float] = Column(Float, nullable=True)
     risk_score = Column(Integer, nullable=True, index=True)
     fraud_level = Column(String(32), nullable=True)
     decision = Column(String(32), nullable=True, index=True)
     transaction_status = Column(String(32), nullable=True)
     model_version = Column(String(64), nullable=True)
     raw_payload = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False, index=True)
 
 
 class BankingAlert(Base):
@@ -153,16 +167,16 @@ class BankingAlert(Base):
     severity = Column(String(16), nullable=False, default="MEDIUM", index=True)
     fraud_level = Column(String(32), nullable=True)
     risk_score = Column(Integer, nullable=True)
-    fraud_probability = Column(Float, nullable=True)
+    fraud_probability: Column[float] = Column(Float, nullable=True)
     decision = Column(String(32), nullable=True)
-    amount = Column(Float, nullable=True)
+    amount: Column[float] = Column(Float, nullable=True)
     currency = Column(String(8), nullable=True)
     country = Column(String(64), nullable=True)
     city = Column(String(64), nullable=True)
     ip_address = Column(String(64), nullable=True)
     message = Column(Text, nullable=False)
     top_reasons = Column(JSON, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False, index=True)
 
 
 class ShapExplanationRecord(Base):
@@ -171,12 +185,12 @@ class ShapExplanationRecord(Base):
     __tablename__ = "banking_shap_explanations"
 
     transaction_id = Column(String(80), primary_key=True, index=True)
-    base_value = Column(Float, nullable=False, default=0.0)
+    base_value: Column[float] = Column(Float, nullable=False, default=0.0)
     feature_names = Column(JSON, nullable=False)
     shap_values = Column(JSON, nullable=False)
     top_reasons = Column(JSON, nullable=False)
     risk_contribution_score = Column(JSON, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 # ======================================================================
@@ -208,7 +222,7 @@ class SimulationRun(Base):
     stopped_at = Column(DateTime, nullable=True)
     status = Column(String(32), default="ACTIVE", index=True)
     rate_tps = Column(Integer, nullable=True)
-    fraud_ratio = Column(Float, nullable=True)
+    fraud_ratio: Column[float] = Column(Float, nullable=True)
     model_version = Column(String(64), nullable=True)
     generated_transactions = Column(Integer, default=0)
     approved = Column(Integer, default=0)
@@ -218,7 +232,7 @@ class SimulationRun(Base):
     detected_frauds = Column(Integer, default=0)
     missed_frauds = Column(Integer, default=0)
     false_positives = Column(Integer, default=0)
-    estimated_avoided_loss = Column(Float, default=0.0)
+    estimated_avoided_loss: Column[float] = Column(Float, default=0.0)
     notes = Column(Text, nullable=True)
 
 
@@ -229,26 +243,30 @@ class ModelBenchmarkResult(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     model_name = Column(String(96), nullable=False, index=True)
-    precision = Column(Float, nullable=True)
-    recall = Column(Float, nullable=True)
-    f1 = Column(Float, nullable=True)
-    mcc = Column(Float, nullable=True)
-    roc_auc = Column(Float, nullable=True)
-    pr_auc = Column(Float, nullable=True)
-    specificity = Column(Float, nullable=True)
-    balanced_accuracy = Column(Float, nullable=True)
+    precision: Column[float] = Column(Float, nullable=True)
+    recall: Column[float] = Column(Float, nullable=True)
+    f1: Column[float] = Column(Float, nullable=True)
+    mcc: Column[float] = Column(Float, nullable=True)
+    roc_auc: Column[float] = Column(Float, nullable=True)
+    pr_auc: Column[float] = Column(Float, nullable=True)
+    specificity: Column[float] = Column(Float, nullable=True)
+    balanced_accuracy: Column[float] = Column(Float, nullable=True)
+    # Performance-vs-latency (powers the fact_model_benchmark scatter):
+    # training wall-clock seconds + mean per-transaction inference latency (ms).
+    training_time: Column[float] = Column(Float, nullable=True)
+    inference_time: Column[float] = Column(Float, nullable=True)
     tp = Column(Integer, nullable=True)
     fp = Column(Integer, nullable=True)
     tn = Column(Integer, nullable=True)
     fn = Column(Integer, nullable=True)
     # Enriched during load from the cost-optimal strategy when available.
-    threshold_value = Column(Float, nullable=True)
+    threshold_value: Column[float] = Column(Float, nullable=True)
     threshold_type = Column(String(48), nullable=True)
-    total_estimated_cost = Column(Float, nullable=True)
-    estimated_avoided_loss = Column(Float, nullable=True)
+    total_estimated_cost: Column[float] = Column(Float, nullable=True)
+    estimated_avoided_loss: Column[float] = Column(Float, nullable=True)
     model_rank = Column(Integer, nullable=True, index=True)
     selected_best_model = Column(Integer, default=0)
-    loaded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    loaded_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class CostComparisonSummary(Base):
@@ -259,24 +277,24 @@ class CostComparisonSummary(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     model_name = Column(String(96), nullable=False, index=True)
     strategy = Column(String(48), nullable=True, index=True)
-    threshold = Column(Float, nullable=True)
+    threshold: Column[float] = Column(Float, nullable=True)
     tp = Column(Integer, nullable=True)
     fp = Column(Integer, nullable=True)
     tn = Column(Integer, nullable=True)
     fn = Column(Integer, nullable=True)
-    precision = Column(Float, nullable=True)
-    recall = Column(Float, nullable=True)
-    f1 = Column(Float, nullable=True)
-    mcc = Column(Float, nullable=True)
-    pr_auc = Column(Float, nullable=True)
-    roc_auc = Column(Float, nullable=True)
-    fraud_loss = Column(Float, nullable=True)
-    fp_cost = Column(Float, nullable=True)
-    total_cost = Column(Float, nullable=True)
-    savings_vs_default = Column(Float, nullable=True)
-    savings_pct_vs_default = Column(Float, nullable=True)
+    precision: Column[float] = Column(Float, nullable=True)
+    recall: Column[float] = Column(Float, nullable=True)
+    f1: Column[float] = Column(Float, nullable=True)
+    mcc: Column[float] = Column(Float, nullable=True)
+    pr_auc: Column[float] = Column(Float, nullable=True)
+    roc_auc: Column[float] = Column(Float, nullable=True)
+    fraud_loss: Column[float] = Column(Float, nullable=True)
+    fp_cost: Column[float] = Column(Float, nullable=True)
+    total_cost: Column[float] = Column(Float, nullable=True)
+    savings_vs_default: Column[float] = Column(Float, nullable=True)
+    savings_pct_vs_default: Column[float] = Column(Float, nullable=True)
     is_optimal_threshold = Column(Integer, default=0)
-    loaded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    loaded_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class CostAnalysisSweep(Base):
@@ -286,23 +304,23 @@ class CostAnalysisSweep(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     model_name = Column(String(96), nullable=False, index=True)
-    threshold = Column(Float, nullable=False, index=True)
+    threshold: Column[float] = Column(Float, nullable=False, index=True)
     tp = Column(Integer, nullable=True)
     fp = Column(Integer, nullable=True)
     tn = Column(Integer, nullable=True)
     fn = Column(Integer, nullable=True)
-    precision = Column(Float, nullable=True)
-    recall = Column(Float, nullable=True)
-    f1 = Column(Float, nullable=True)
-    mcc = Column(Float, nullable=True)
-    specificity = Column(Float, nullable=True)
-    fraud_loss = Column(Float, nullable=True)
-    fp_cost = Column(Float, nullable=True)
-    total_cost = Column(Float, nullable=True)
+    precision: Column[float] = Column(Float, nullable=True)
+    recall: Column[float] = Column(Float, nullable=True)
+    f1: Column[float] = Column(Float, nullable=True)
+    mcc: Column[float] = Column(Float, nullable=True)
+    specificity: Column[float] = Column(Float, nullable=True)
+    fraud_loss: Column[float] = Column(Float, nullable=True)
+    fp_cost: Column[float] = Column(Float, nullable=True)
+    total_cost: Column[float] = Column(Float, nullable=True)
     is_f1_optimal = Column(Integer, default=0)
     is_mcc_optimal = Column(Integer, default=0)
     is_cost_optimal = Column(Integer, default=0)
-    loaded_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    loaded_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class PowerBIExportLog(Base):
@@ -317,4 +335,4 @@ class PowerBIExportLog(Base):
     file_count = Column(Integer, nullable=True)
     total_rows = Column(Integer, nullable=True)
     warnings = Column(JSON, nullable=True)
-    generated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    generated_at = Column(DateTime, default=utc_now, nullable=False)

@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+stacking_ensemble,default_0.50,0.5,55,3,56884,20,0.9483,0.7333,0.8271,0.8337,0.7202,0.8865,1089.88,37.5,1127.38,0.0,0.0
+stacking_ensemble,f1_optimal,0.04,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7202,0.8865,1036.66,37.5,1074.16,53.22,4.72
+stacking_ensemble,mcc_optimal,0.04,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7202,0.8865,1036.66,37.5,1074.16,53.22,4.72
+stacking_ensemble,cost_optimal,0.04,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7202,0.8865,1036.66,37.5,1074.16,53.22,4.72

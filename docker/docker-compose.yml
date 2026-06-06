@@ -8,6 +8,8 @@ services:
     container_name: fraud-api
     environment:
       - DATABASE_URL=postgresql+psycopg2://fraud:fraud@db:5432/fraud_db
+      - API_HOST=0.0.0.0
+      - API_PORT=8080
     ports:
       - "8080:8080"
     depends_on:

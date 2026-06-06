@@ -5,7 +5,9 @@ figures plus the master comparison table.
 """
 from __future__ import annotations
 
+import json
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -43,6 +45,21 @@ def main() -> None:
     y = test_df["Class"].values.astype(int)
     X = test_df.drop(columns=["Class"])
 
+    # Training wall-clock seconds captured by the trainer (per model).
+    training_times: dict[str, float] = {}
+    summary_path = PROJECT_ROOT / "reports" / "tables" / "training_summary.json"
+    if summary_path.exists():
+        with open(summary_path, "r", encoding="utf-8") as fh:
+            summary = json.load(fh)
+        training_times = {
+            k: v.get("training_time_sec")
+            for k, v in summary.items()
+            if isinstance(v, dict)
+        }
+    else:
+        log.warning("training_summary.json not found - training_time will be empty.")
+
+    n_rows = len(X)
     probas: dict[str, np.ndarray] = {}
     reports: dict[str, dict[str, float]] = {}
 
@@ -52,7 +69,11 @@ def main() -> None:
         except FileNotFoundError:
             log.warning(f"Skipping {name} (not trained).")
             continue
+        # Time the full-batch inference on the identical hold-out X for every
+        # model, then express it as mean per-transaction latency in milliseconds.
+        t0 = time.perf_counter()
         proba = model.predict_proba(X)[:, 1]
+        infer_elapsed = time.perf_counter() - t0
         probas[name] = proba
         # F1-optimal threshold per model
         from src.training.threshold import best_threshold
@@ -60,7 +81,15 @@ def main() -> None:
         preds = (proba >= thr).astype(int)
         m = compute_metrics(y, preds, proba)
         m["threshold"] = round(thr, 4)
+        m["training_time"] = training_times.get(name)
+        m["inference_time"] = (
+            round(infer_elapsed / n_rows * 1000.0, 6) if n_rows else None
+        )
         reports[name] = m
+        log.info(
+            f"[{name}] inference={m['inference_time']} ms/tx  "
+            f"training={m['training_time']} s"
+        )
         plot_confusion_matrix(y, preds, name)
         plot_threshold_curve(y, proba, name)
 

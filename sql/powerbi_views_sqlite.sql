@@ -55,7 +55,8 @@ SELECT
     CASE WHEN COALESCE(t.scenario, 'normal') = 'normal' AND t.decision = 'BLOCKED'
          THEN 12.5 ELSE 0 END                              AS estimated_false_positive_cost,
     COALESCE(t.model_version, 'dynamic-fraud-engine')      AS model_name,
-    t.created_at
+    t.created_at,
+    CAST(strftime('%H', COALESCE(t.timestamp, t.created_at)) AS INTEGER) AS transaction_hour
 FROM banking_transactions t;
 
 -- 2. Live KPI snapshot -------------------------------------------------
@@ -134,6 +135,7 @@ CREATE VIEW vw_powerbi_model_benchmark AS
 SELECT
     model_name, threshold_type, threshold_value,
     precision, recall, f1, mcc, roc_auc, pr_auc, specificity, balanced_accuracy,
+    training_time, inference_time,
     fp AS false_positives, fn AS false_negatives, tp, tn,
     total_estimated_cost, estimated_avoided_loss, model_rank, selected_best_model
 FROM model_benchmark_results;
@@ -187,7 +189,13 @@ SELECT
     SUM(CASE WHEN t.decision = 'BLOCKED' THEN 1 ELSE 0 END)                           AS blocked,
     COALESCE(SUM(COALESCE(t.amount, t.transaction_amount, 0)), 0)                     AS total_amount,
     COALESCE(AVG(t.risk_score), 0)                                                    AS avg_risk_score,
-    'Données synthétiques de démonstration — non représentatives de la fraude bancaire réelle au Maroc.' AS data_label
+    'Données synthétiques de démonstration — non représentatives de la fraude bancaire réelle au Maroc.' AS data_label,
+    -- Same column order as the PostgreSQL view (lat/lon/fraud_rate appended last).
+    AVG(t.latitude)                                                                   AS latitude,
+    AVG(t.longitude)                                                                  AS longitude,
+    CASE WHEN COUNT(*) > 0
+         THEN 1.0 * SUM(CASE WHEN COALESCE(t.scenario, 'normal') <> 'normal' THEN 1 ELSE 0 END) / COUNT(*)
+         ELSE 0 END                                                                  AS fraud_rate
 FROM banking_transactions t
 WHERE t.country = 'Morocco'
 GROUP BY t.city;

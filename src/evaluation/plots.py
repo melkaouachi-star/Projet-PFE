@@ -110,9 +110,15 @@ def plot_metric_comparison(report_df: pd.DataFrame) -> Path:
 def comparison_table(reports: Dict[str, Dict[str, float]]) -> pd.DataFrame:
     """Build the final per-model comparison table."""
     df = pd.DataFrame(reports).T
-    df = df[["precision", "recall", "f1", "mcc",
-             "roc_auc", "pr_auc", "specificity",
-             "balanced_accuracy", "tp", "fp", "tn", "fn"]]
+    cols = ["precision", "recall", "f1", "mcc",
+            "roc_auc", "pr_auc", "specificity",
+            "balanced_accuracy", "tp", "fp", "tn", "fn"]
+    # Performance-vs-latency columns (supplied by run_evaluation.py). Kept
+    # optional so other callers that don't provide them still work.
+    for extra in ("training_time", "inference_time"):
+        if extra in df.columns:
+            cols.append(extra)
+    df = df[cols]
     out = PROJECT_ROOT / "reports" / "tables" / "model_comparison.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out)

@@ -34,6 +34,7 @@ fact_transactions,vw_powerbi_live_transactions,estimated_avoided_loss,decimal,am
 fact_transactions,vw_powerbi_live_transactions,estimated_false_positive_cost,decimal,12.5 when (scenario=normal AND BLOCKED) else 0 (config powerbi.fp_unit_cost),derived_economic
 fact_transactions,vw_powerbi_live_transactions,model_name,text,Scoring engine / model version (COALESCE model_version),model_output
 fact_transactions,vw_powerbi_live_transactions,created_at,datetime,Row insertion time (used for live ORDER BY / refresh),real_simulated
+fact_transactions,vw_powerbi_live_transactions,transaction_hour,whole number,Hour of day 0-23 from COALESCE(timestamp created_at) for 'transactions par heure' visuals,real_simulated
 fact_fraud_alerts,vw_powerbi_fraud_alerts,alert_id,whole number,Alert PK (banking_alerts.id),real_simulated
 fact_fraud_alerts,vw_powerbi_fraud_alerts,transaction_id,text,FK to fact_transactions,real_simulated
 fact_fraud_alerts,vw_powerbi_fraud_alerts,timestamp,datetime,Alert creation time,real_simulated
@@ -74,6 +75,8 @@ fact_model_benchmark,vw_powerbi_model_benchmark,roc_auc,decimal,ROC AUC,benchmar
 fact_model_benchmark,vw_powerbi_model_benchmark,pr_auc,decimal,Precision-Recall AUC,benchmark_output
 fact_model_benchmark,vw_powerbi_model_benchmark,specificity,decimal,True negative rate,benchmark_output
 fact_model_benchmark,vw_powerbi_model_benchmark,balanced_accuracy,decimal,Balanced accuracy,benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,training_time,decimal,Training wall-clock time in seconds (measured by trainer.py),benchmark_output
+fact_model_benchmark,vw_powerbi_model_benchmark,inference_time,decimal,Mean per-transaction inference latency in milliseconds on the hold-out test set,benchmark_output
 fact_model_benchmark,vw_powerbi_model_benchmark,false_positives,whole number,FP count (fp),benchmark_output
 fact_model_benchmark,vw_powerbi_model_benchmark,false_negatives,whole number,FN count (fn),benchmark_output
 fact_model_benchmark,vw_powerbi_model_benchmark,tp,whole number,True positives,benchmark_output
@@ -124,3 +127,6 @@ fact_simulation,vw_powerbi_simulation_effectiveness,false_positive_rate,decimal,
 live_kpis,vw_powerbi_live_kpis,total_transactions,whole number,Single-row live KPI snapshot across all transactions,derived_metric
 dim_moroccan_context,vw_powerbi_moroccan_context,city,text,Moroccan city (synthetic demo only),synthetic_demo
 dim_moroccan_context,vw_powerbi_moroccan_context,data_label,text,Mandatory disclaimer: synthetic demo data not representative of real Moroccan fraud,synthetic_demo
+dim_moroccan_context,vw_powerbi_moroccan_context,latitude,decimal,Average synthetic latitude of the city (for the Page 9 map),synthetic_demo
+dim_moroccan_context,vw_powerbi_moroccan_context,longitude,decimal,Average synthetic longitude of the city (for the Page 9 map),synthetic_demo
+dim_moroccan_context,vw_powerbi_moroccan_context,fraud_rate,decimal,simulated_frauds / transactions for the city (map colour/tooltip),synthetic_demo

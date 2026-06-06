@@ -165,8 +165,12 @@ powerbi:
   api_row_limit: 50000
 
 database:
-  url: "sqlite:///./fraud_detection.db"
-  # url: "postgresql+psycopg2://user:pass@localhost:5432/fraud_db"
+  # Local PostgreSQL used by docker/docker-compose.yml.
+  # Start it with:
+  #   docker compose -f docker/docker-compose.yml up -d db
+  url: "postgresql+psycopg2://fraud:fraud@localhost:5432/fraud_db"
+  # SQLite fallback for offline tests only; Power BI DirectQuery needs PostgreSQL.
+  # url: "sqlite:///./fraud_detection.db"
   echo: false
 
 logging:

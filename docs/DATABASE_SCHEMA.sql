@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS banking_customers (
     known_devices JSONB,
     usual_countries JSONB,
     fraud_history_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -163,6 +164,8 @@ CREATE TABLE IF NOT EXISTS model_benchmark_results (
     pr_auc DOUBLE PRECISION,
     specificity DOUBLE PRECISION,
     balanced_accuracy DOUBLE PRECISION,
+    training_time DOUBLE PRECISION,   -- training wall-clock seconds (from trainer)
+    inference_time DOUBLE PRECISION,  -- mean per-transaction inference latency (ms)
     false_positives INTEGER,
     false_negatives INTEGER,
     total_estimated_cost DOUBLE PRECISION,

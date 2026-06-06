@@ -68,7 +68,7 @@ same FastAPI service. The dashboard remains available at `/dashboard`.
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | SQLAlchemy connection string (SQLite default) |
+| `DATABASE_URL` | SQLAlchemy connection string (PostgreSQL for live / Power BI DirectQuery) |
 | `API_HOST`, `API_PORT` | API binding |
 | `FRAUD_CONFIG` | Override path to `configs/config.yaml` |
 | `LOG_LEVEL` | DEBUG / INFO / WARNING |

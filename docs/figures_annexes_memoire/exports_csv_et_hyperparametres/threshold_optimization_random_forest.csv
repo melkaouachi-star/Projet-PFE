@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+random_forest,default_0.50,0.5,54,1,56886,21,0.9818,0.72,0.8308,0.8406,0.8094,0.9825,1158.84,12.5,1171.34,0.0,0.0
+random_forest,f1_optimal,0.29,58,5,56882,17,0.9206,0.7733,0.8406,0.8436,0.8094,0.9825,928.07,62.5,990.57,180.77,15.43
+random_forest,mcc_optimal,0.29,58,5,56882,17,0.9206,0.7733,0.8406,0.8436,0.8094,0.9825,928.07,62.5,990.57,180.77,15.43
+random_forest,cost_optimal,0.29,58,5,56882,17,0.9206,0.7733,0.8406,0.8436,0.8094,0.9825,928.07,62.5,990.57,180.77,15.43

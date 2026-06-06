@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+xgboost,default_0.50,0.5,54,0,56887,21,1.0,0.72,0.8372,0.8484,0.7651,0.8866,1156.03,0.0,1156.03,0.0,0.0
+xgboost,f1_optimal,0.49,54,0,56887,21,1.0,0.72,0.8372,0.8484,0.7651,0.8866,1156.03,0.0,1156.03,0.0,0.0
+xgboost,mcc_optimal,0.49,54,0,56887,21,1.0,0.72,0.8372,0.8484,0.7651,0.8866,1156.03,0.0,1156.03,0.0,0.0
+xgboost,cost_optimal,0.09,58,11,56876,17,0.8406,0.7733,0.8056,0.806,0.7651,0.8866,928.07,137.5,1065.57,90.46,7.83

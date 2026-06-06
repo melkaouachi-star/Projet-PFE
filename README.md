@@ -213,9 +213,9 @@ MIT - free for academic use.
 
 ```bibtex
 @mastersthesis{fraud_detection_2026,
-  title  = {Real-Time Credit-Card Fraud Detection with Explainable AI},
-  author = {<Your Name>},
-  school = {<Your University>},
+  title  = { Credit-Card Fraud Detection with Explainable AI},
+  author = {<El Kaouachi Mohamed Ismail>},
+  school = {<FSJES Cadi Ayyad>},
   year   = {2026}
 }
 ```

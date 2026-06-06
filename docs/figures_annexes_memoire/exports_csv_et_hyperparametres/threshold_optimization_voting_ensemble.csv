@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+voting_ensemble,default_0.50,0.5,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7288,0.9391,1036.66,37.5,1074.16,0.0,0.0
+voting_ensemble,f1_optimal,0.02,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7288,0.9391,1036.66,37.5,1074.16,0.0,0.0
+voting_ensemble,mcc_optimal,0.02,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7288,0.9391,1036.66,37.5,1074.16,0.0,0.0
+voting_ensemble,cost_optimal,0.02,56,3,56884,19,0.9492,0.7467,0.8358,0.8417,0.7288,0.9391,1036.66,37.5,1074.16,0.0,0.0

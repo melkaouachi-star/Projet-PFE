@@ -14,8 +14,15 @@ from typing import Any, Dict
 
 import yaml
 
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - python-dotenv is optional in minimal runtimes
+    load_dotenv = None
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "configs" / "config.yaml"
+if load_dotenv is not None:
+    load_dotenv(PROJECT_ROOT / ".env")
 
 
 class Config(dict):

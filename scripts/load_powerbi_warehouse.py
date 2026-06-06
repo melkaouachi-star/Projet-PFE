@@ -36,6 +36,7 @@ sys.path.insert(0, str(ROOT))
 
 import pandas as pd
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
 from src.database.models import (
     CostAnalysisSweep,
@@ -47,6 +48,49 @@ from src.utils.config import PROJECT_ROOT, get_config
 from src.utils.logger import get_logger
 
 log = get_logger("scripts.load_powerbi_warehouse")
+
+
+def _redact_database_url(url: str) -> str:
+    if "://" not in url or "@" not in url:
+        return url
+    scheme, rest = url.split("://", 1)
+    credentials, host = rest.split("@", 1)
+    user = credentials.split(":", 1)[0]
+    return f"{scheme}://{user}:***@{host}"
+
+
+def _print_postgres_help(exc: OperationalError) -> None:
+    db_url = _redact_database_url(str(engine.url))
+    message = f"""
+PostgreSQL is configured but the connection failed.
+
+Current SQLAlchemy URL:
+  {db_url}
+
+This usually means PostgreSQL is not running on localhost:5432.
+
+Fix for local Power BI DirectQuery setup:
+  1. Open Docker Desktop and wait until it is running.
+  2. Start the project PostgreSQL container:
+       docker compose -f docker/docker-compose.yml up -d db
+  3. Check the container:
+       docker ps
+  4. Run the warehouse loader again:
+       python scripts/load_powerbi_warehouse.py
+
+Alternative if you installed PostgreSQL manually:
+  - Create database: fraud_db
+  - Create user/password matching your DATABASE_URL
+  - Or set a custom URL in PowerShell before running:
+       $env:DATABASE_URL="postgresql+psycopg2://user:password@localhost:5432/fraud_db"
+
+For Render/cloud:
+  - Copy the Render PostgreSQL internal/external connection string into DATABASE_URL.
+
+Original error:
+  {exc}
+"""
+    print(message.strip(), file=sys.stderr)
 
 
 def _tables_dir() -> Path:
@@ -169,6 +213,8 @@ def load_model_benchmark(db, base: Path) -> int:
             roc_auc=_as_float(d.get("roc_auc")), pr_auc=_as_float(d.get("pr_auc")),
             specificity=_as_float(d.get("specificity")),
             balanced_accuracy=_as_float(d.get("balanced_accuracy")),
+            training_time=_as_float(d.get("training_time")),
+            inference_time=_as_float(d.get("inference_time")),
             tp=_as_int(d.get("tp")), fp=_as_int(d.get("fp")),
             tn=_as_int(d.get("tn")), fn=_as_int(d.get("fn")),
             threshold_value=_as_float(cost.get("threshold")),
@@ -232,7 +278,12 @@ def main() -> None:
     p.add_argument("--no-views", action="store_true", help="Load tables but skip view creation.")
     args = p.parse_args()
 
-    init_db()  # ensure all tables exist (idempotent)
+    try:
+        init_db()  # ensure all tables exist (idempotent)
+    except OperationalError as exc:
+        _print_postgres_help(exc)
+        raise SystemExit(2) from exc
+
     base = _tables_dir()
 
     if not args.views_only:

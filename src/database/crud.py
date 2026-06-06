@@ -151,7 +151,10 @@ def list_customers(db: Session, limit: int = 100, offset: int = 0) -> List[Banki
 
 
 def record_banking_assessment(
-    db: Session, transaction: dict, assessment: dict, simulation_run_id: Optional[str] = None
+    db: Session,
+    transaction: dict[str, Any],
+    assessment: dict[str, Any],
+    simulation_run_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Persist one (transaction, score) pair.

@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+logistic_regression,default_0.50,0.5,57,164,56723,18,0.2579,0.76,0.3851,0.4416,0.6298,0.8597,980.77,2050.0,3030.77,0.0,0.0
+logistic_regression,f1_optimal,0.84,51,18,56869,24,0.7391,0.68,0.7083,0.7086,0.6298,0.8597,1301.37,225.0,1526.37,1504.4,49.64
+logistic_regression,mcc_optimal,0.84,51,18,56869,24,0.7391,0.68,0.7083,0.7086,0.6298,0.8597,1301.37,225.0,1526.37,1504.4,49.64
+logistic_regression,cost_optimal,0.84,51,18,56869,24,0.7391,0.68,0.7083,0.7086,0.6298,0.8597,1301.37,225.0,1526.37,1504.4,49.64

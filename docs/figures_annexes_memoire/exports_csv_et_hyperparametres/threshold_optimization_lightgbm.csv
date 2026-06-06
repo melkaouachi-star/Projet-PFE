@@ -1,0 +1,5 @@
+model,strategy,threshold,tp,fp,tn,fn,precision,recall,f1,mcc,pr_auc,roc_auc,fraud_loss,fp_cost,total_cost,savings_vs_default,savings_pct_vs_default
+lightgbm,default_0.50,0.5,50,0,56887,25,1.0,0.6667,0.8,0.8163,0.7621,0.8866,1370.67,0.0,1370.67,0.0,0.0
+lightgbm,f1_optimal,0.1,58,7,56880,17,0.8923,0.7733,0.8286,0.8305,0.7621,0.8866,928.07,87.5,1015.57,355.1,25.91
+lightgbm,mcc_optimal,0.1,58,7,56880,17,0.8923,0.7733,0.8286,0.8305,0.7621,0.8866,928.07,87.5,1015.57,355.1,25.91
+lightgbm,cost_optimal,0.1,58,7,56880,17,0.8923,0.7733,0.8286,0.8305,0.7621,0.8866,928.07,87.5,1015.57,355.1,25.91

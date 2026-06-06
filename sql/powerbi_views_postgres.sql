@@ -59,7 +59,8 @@ SELECT
     CASE WHEN COALESCE(t.scenario, 'normal') = 'normal' AND t.decision = 'BLOCKED'
          THEN 12.5 ELSE 0 END                              AS estimated_false_positive_cost,
     COALESCE(t.model_version, 'dynamic-fraud-engine')      AS model_name,
-    t.created_at
+    t.created_at,
+    EXTRACT(HOUR FROM COALESCE(t.timestamp, t.created_at))::int AS transaction_hour
 FROM banking_transactions t;
 
 -- 2. Live KPI snapshot (single row) ------------------------------------
@@ -152,7 +153,11 @@ SELECT
     total_estimated_cost,
     estimated_avoided_loss,
     model_rank,
-    selected_best_model
+    selected_best_model,
+    -- Appended after existing columns so CREATE OR REPLACE VIEW (which forbids
+    -- reordering/inserting existing columns) stays valid. Power BI refs by name.
+    training_time,
+    inference_time
 FROM model_benchmark_results;
 
 -- 6. Cost comparison summary (fact_cost_analysis) ----------------------
@@ -242,7 +247,14 @@ SELECT
     COUNT(*) FILTER (WHERE t.decision = 'BLOCKED')                             AS blocked,
     COALESCE(SUM(COALESCE(t.amount, t.transaction_amount, 0)), 0)              AS total_amount,
     COALESCE(AVG(t.risk_score), 0)                                            AS avg_risk_score,
-    'Données synthétiques de démonstration — non représentatives de la fraude bancaire réelle au Maroc.' AS data_label
+    'Données synthétiques de démonstration — non représentatives de la fraude bancaire réelle au Maroc.' AS data_label,
+    -- Appended after data_label so CREATE OR REPLACE VIEW (which forbids
+    -- reordering existing columns) stays valid. Power BI references by name.
+    AVG(t.latitude)                                                           AS latitude,
+    AVG(t.longitude)                                                          AS longitude,
+    CASE WHEN COUNT(*) > 0
+         THEN SUM(CASE WHEN COALESCE(t.scenario, 'normal') <> 'normal' THEN 1 ELSE 0 END)::double precision / COUNT(*)
+         ELSE 0 END                                                          AS fraud_rate
 FROM banking_transactions t
 WHERE t.country = 'Morocco'
 GROUP BY t.city;

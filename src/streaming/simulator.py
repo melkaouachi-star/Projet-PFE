@@ -2,18 +2,29 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import uuid
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
-from src.database import crud
-from src.database.session import SessionLocal
-from src.scoring.dynamic_engine import MODEL_VERSION, DynamicFraudScoringEngine, assessment_to_event
-from src.simulation.transactions import TransactionGenerator
-from src.streaming.broker import EventBroker, get_broker
-from src.utils.logger import get_logger
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.database import crud  # noqa: E402
+from src.database.session import SessionLocal  # noqa: E402
+from src.scoring.dynamic_engine import MODEL_VERSION, DynamicFraudScoringEngine, assessment_to_event  # noqa: E402
+from src.simulation.transactions import TransactionGenerator  # noqa: E402
+from src.streaming.broker import EventBroker, get_broker  # noqa: E402
+from src.utils.logger import get_logger  # noqa: E402
 
 log = get_logger("streaming.simulator")
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 @dataclass
@@ -38,9 +49,9 @@ class SimulationService:
         self.engine = engine or DynamicFraudScoringEngine()
         self.generator = generator or TransactionGenerator()
         self.state = SimulatorState()
-        self._task: asyncio.Task | None = None
+        self._task: asyncio.Task[None] | None = None
 
-    async def start(self, rate_tps: int = 10, fraud_ratio: float = 0.08) -> dict:
+    async def start(self, rate_tps: int = 10, fraud_ratio: float = 0.08) -> dict[str, Any]:
         self.state.rate_tps = _clamp_rate(rate_tps)
         self.state.fraud_ratio = max(0.0, min(1.0, fraud_ratio))
         self.state.last_error = None
@@ -48,11 +59,11 @@ class SimulationService:
             self.state.running = True
             return self.status()
         self.state.running = True
-        self.state.started_at = datetime.utcnow().isoformat()
+        self.state.started_at = _utc_now().isoformat()
         self.state.generated = 0
         # Open a SimulationRun row so Power BI can slice by discrete run.
         # Guarded: a DB hiccup here must never prevent the simulator starting.
-        self.state.run_id = f"RUN-{datetime.utcnow():%Y%m%d%H%M%S}-{uuid.uuid4().hex[:6].upper()}"
+        self.state.run_id = f"RUN-{_utc_now():%Y%m%d%H%M%S}-{uuid.uuid4().hex[:6].upper()}"
         try:
             with SessionLocal() as db:
                 crud.create_simulation_run(
@@ -72,7 +83,7 @@ class SimulationService:
         )
         return self.status()
 
-    async def stop(self) -> dict:
+    async def stop(self) -> dict[str, Any]:
         self.state.running = False
         if self._task and not self._task.done():
             self._task.cancel()
@@ -91,11 +102,11 @@ class SimulationService:
         log.info(f"Stopped simulation {self.state.run_id}.")
         return self.status()
 
-    def configure_customers(self, customers: list[dict]) -> None:
+    def configure_customers(self, customers: list[dict[str, Any]]) -> None:
         if customers:
             self.generator.customers = customers
 
-    def status(self) -> dict:
+    def status(self) -> dict[str, Any]:
         return {
             "running": self.state.running,
             "rate_tps": self.state.rate_tps,
