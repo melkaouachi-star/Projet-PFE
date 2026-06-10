@@ -148,7 +148,7 @@ Content-Type: application/json
     "Latent feature V17 deviates from legitimate-transaction patterns.",
     "Transaction occurred during high-risk hours."
   ],
-  "model_name": "stacking_ensemble",
+  "model_name": "Random Forest",
   "created_at": "2026-05-19T11:24:13.221Z"
 }
 ```
