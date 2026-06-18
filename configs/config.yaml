@@ -136,7 +136,7 @@ calibration:
 
 api:
   host: "0.0.0.0"
-  port: 8000
+  port: 8080
   reload: false
   cors_origins: ["*"]
   default_model: "stacking_ensemble"
@@ -145,7 +145,7 @@ api:
 
 dashboard:
   refresh_interval_seconds: 5
-  api_base_url: "http://localhost:8000"
+  api_base_url: "http://localhost:8080"
 
 powerbi:
   # Output directory for timestamped export bundles (scripts/build_powerbi_bundle.py).
